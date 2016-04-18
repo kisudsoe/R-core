@@ -5,9 +5,13 @@
 
 input = function(i) {
   if(i == 0) {
+    data = read.table("clipboard") # Data only. No colnames and rownames
   } else if(i == 1) {
+    data = read.table("clipboard", header=T) # Set colnames
   } else if(i == 2) {
+    data = read.table("clipboard", row.names=1) # No colnames. Set rownames
   } else if(i == 3) {
+    data = read.table("clipboard", header=T, row.names=1) # Set colnames and rownames
   }
   return(data)
 }
