@@ -1,3 +1,4 @@
+# 2016-04-19 TUE----
 ## Input group information & t-test
 group = c("CC-ALD","CC-ALD","CC-ALD","AMN","AMN","AMN","AMN","CC-ALD")
 ss.ttest.fdr = function(data, group) {
@@ -37,7 +38,7 @@ ss.ttest.fdr = function(data, group) {
   # STEP 2. Calculate adjust p-values
   raw.p = as.vector(raw.p)
   library(fdrtool)
-  #pval.estimate.eta0(p1,method="bootstrap") # plot 그리기
+  #pval.estimate.eta0(p1,method="bootstrap") # Draw plot
   q = fdrtool(raw.p,statistic="pvalue")
   fdrtool.qval = q$qval
   cat('(1/9) fdrtool.tfdr\t-> done\n')
@@ -84,7 +85,7 @@ ss.ttest.fdr = function(data, group) {
           xlab="Raw p-value",
           ylab="Adjusted p-value",
           type="l",
-          col=c("black",rainbow(9)), # 색지정
+          col=c("black",rainbow(9)), # Set color
           lty=1,
           lwd=2)
   legend('bottomright',
@@ -98,12 +99,12 @@ ss.ttest.fdr = function(data, group) {
                   "stat.Hochberg",
                   "stat.Holm",
                   "stat.Bonfferoni"),
-         col=c("black",rainbow(9)), # 색지정
+         col=c("black",rainbow(9)), # Set color
          cex=1,
          pch=16)
   
   x11()
-  par(mfrow=c(2,2)) # 2행 2열로 plot 파티션 나누기
+  par(mfrow=c(2,2)) # 2x2 plot partition
   hist(raw.p, xlim=c(0,1))
   hist(fdrtool.qval, xlim=c(0,1))
   hist(stat.BH.fdr, xlim=c(0,1))
@@ -122,3 +123,5 @@ ss.ttest.fdr = function(data, group) {
   
   return(result)
 }
+
+pval_gene = ss.ttest.fdr(data_gene_mainNum,group)
