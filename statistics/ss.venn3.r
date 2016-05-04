@@ -37,3 +37,32 @@ ss.venn3 = function(group1, group2, group3) { # data with 3-group columns
 }
 
 fc_union_id = ss.venn3(fc_Rho.HD_id,fc_Rho.LD_id,fc_HD.LD_id)
+
+
+ss.tukey3Venn2 = function(tukey,group) {
+	# Make T/F table
+	print(tukey[1:10,])
+	out = NULL
+	n = length(rownames(tukey))
+	out = apply(tukey,1,function(row){
+				cp1 = ifelse(length(grep(row[2],row[1]))==0,TRUE,FALSE)
+				cp2 = ifelse(length(grep(row[2],row[3]))==0,TRUE,FALSE)
+				cp3 = ifelse(length(grep(row[1],row[3]))==0,TRUE,FALSE)
+				output = c(cp1, cp2, cp3)
+				return(output)
+			})
+	out = t(out)
+	coln = colnames(tukey)
+	colnames(out) = c(paste(coln[2],"!=",coln[1],sep=""),
+					  paste(coln[2],"!=",coln[3],sep=""),
+					  paste(coln[1],"!=",coln[3],sep=""))
+	print(out[1:10,])
+	
+	# Make Venn Diagram
+	library(limma)
+	vennDiagram(out) # Generate Venn Diagram
+	
+	# Make return table
+	out = data.frame(tukey,out)
+	return(out)
+}
