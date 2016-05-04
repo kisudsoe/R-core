@@ -1,4 +1,7 @@
-﻿ss.gene.selec = function(data.fc,fc=1.5,data.fdr,fcfdr) {
+﻿# 2016-04-29 FRI ver.
+# Yeast HD LD Rho project
+
+ss.gene.selec = function(data.fc,fc=1.5,data.fdr,fcfdr) {
 	n= length(colnames(data.fc))
   
 	for(i in 1:n) {
