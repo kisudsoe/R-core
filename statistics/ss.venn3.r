@@ -1,6 +1,6 @@
-﻿
-
-ss.venn3 = function(group1, group2, group3) { # data with 3-group columns
+﻿# 2015
+## Coded for general
+ss.venn3 = function(group1, group2, group3) { # id for each 3-groups
   
 	# Generate union group from input three groups
 	unionlist = union(group1,group2)
@@ -39,18 +39,25 @@ ss.venn3 = function(group1, group2, group3) { # data with 3-group columns
 fc_union_id = ss.venn3(fc_Rho.HD_id,fc_Rho.LD_id,fc_HD.LD_id)
 
 
-ss.tukey3Venn2 = function(tukey,group) {
+# 2016-05-04 WED - First version
+## Ver 1.0a - 160505 Print process information
+## Coded for Human X-ALD project, Yeast project
+ss.tukey3Venn = function(tukey,group) { # 160504 row[2] is centered.
+	library(pbapply)
 	# Make T/F table
 	print(tukey[1:10,])
 	out = NULL
 	n = length(rownames(tukey))
-	out = apply(tukey,1,function(row){
-				cp1 = ifelse(length(grep(row[2],row[1]))==0,TRUE,FALSE)
-				cp2 = ifelse(length(grep(row[2],row[3]))==0,TRUE,FALSE)
-				cp3 = ifelse(length(grep(row[1],row[3]))==0,TRUE,FALSE)
-				output = c(cp1, cp2, cp3)
-				return(output)
-			})
+	cat('\n------------------------------------------------------\n')
+	cat('Process iteration =',n,'\n')
+	out = pbapply(tukey,1,function(row){
+		cp1 = ifelse(length(grep(row[2],row[1]))==0,TRUE,FALSE)
+		cp2 = ifelse(length(grep(row[2],row[3]))==0,TRUE,FALSE)
+		cp3 = ifelse(length(grep(row[1],row[3]))==0,TRUE,FALSE)
+		output = c(cp1, cp2, cp3)
+		return(output)
+	})
+	cat('------------------------------------------------------\n\n')
 	out = t(out)
 	coln = colnames(tukey)
 	colnames(out) = c(paste(coln[2],"!=",coln[1],sep=""),
