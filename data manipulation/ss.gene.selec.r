@@ -1,5 +1,6 @@
 ﻿# 2016-04-29 FRI ver.
-# Yeast HD LD Rho project
+## Ver 1.0	- 150903, original version of this function
+## ver 1.1	- 160429, using for Yeast HD LD Rho project
 
 ss.gene.selec = function(data.fc,fc=1.5,data.fdr,fcfdr) {
 	n= length(colnames(data.fc))
@@ -43,5 +44,5 @@ ss.gene.selec = function(data.fc,fc=1.5,data.fdr,fcfdr) {
 
 fcfdr2 = c("fc2&fdr1","fc2&fdr5","fc2&fdr10")
 gene.num2 = ss.gene.selec(fc.cerev[,1:3],fc=2,
-                          pval_cerev$stat.Bonferroni,fcfdr2) # 2015-09-03 fc.fdr.selec
+                          pval_cerev$stat.Bonferroni,fcfdr2)
 View(gene.num2$result)
