@@ -1,5 +1,6 @@
-# 2016-05-03 ver
-# ver 2.0 - Advanced process speed than 'ss.anova.fdr' function
+# 2016-05-06 ver
+## ver 2.0	- 160503, Advanced process speed than 'ss.anova.fdr' function
+## ver 2.1	- 160506, set rownames to result for Yeast HDLDRho project
 
 ss.anova.fdr2 = function(data,group) {
 	library(pbapply) # package for progressbar, install needed
@@ -12,7 +13,7 @@ ss.anova.fdr2 = function(data,group) {
 	raw.p = pbapply(data,1,function(row){
 				  anovaP = anova(lm(row~group))$'Pr(>F)'[1]})
 	time2 = Sys.time()
-	cat('Process iteration =',n)
+	cat('Process iteration =',n,'\n')
 	print(time2-time1)
 	cat('----------------------------------\n\n')
   
@@ -55,7 +56,7 @@ ss.anova.fdr2 = function(data,group) {
                         stat.Hochberg,
                         stat.Holm,
                         stat.Bonferroni)
-	#rownames(result) = rown # set row names <- not this time.
+	rownames(result) = rownames(data) # set row names
   
 	## Plot draw start ##
 	result.r = result[order(raw.p),] # re-ordered by raw.p
