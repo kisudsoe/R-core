@@ -1,5 +1,6 @@
 # 2016-05-01 SUN
-# Yeast HD LD Rho project
+## ver 1.0	- 160501, Yeast HD LD Rho project
+## ver 1.0a	- 160504, Bugfix: as.factor(group) at line 5
 
 ss.fc = function(data,group) {
 	library(pbapply) # package for progressbar, install needed
@@ -39,6 +40,3 @@ ss.fc = function(data,group) {
 }
 
 fc.cerev = as.data.frame(ss.fc(sgnl.cerev,group))
-
-## Update log ##
-## 2016-05-04 WED update01 - as.factor(group) at line 5
