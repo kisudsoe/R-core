@@ -1,5 +1,6 @@
 ﻿# 2016-05-04 WED----
-## Ver 2.0 : Advanced process speed
+## Ver 2.0 - 160504, Advanced process speed
+
 ss.tukey2 = function(data,groups) {
 	library(multcompView) # package multcompView install needed
 	library(pbapply) # package for progressbar, install needed
@@ -22,7 +23,7 @@ ss.tukey2 = function(data,groups) {
 		output = t(data.frame(sigroup$Letters))
 		return(output)
 		}) # apply statement end
-	out = t(out)
+	out = as.data.frame(t(out))
 	
 	## Get column names ##
 	values = as.numeric(data[1,])
@@ -39,7 +40,8 @@ tukey_gene = ss.tukey2(data_gene_mainNum,group)
 
 
 # 2016-05-01 SUN----
-## Ver 1.0 : Tukey for post hoc test
+## Ver 1.0 - 160501, Tukey for post hoc test
+
 ss.tukey = function(data,groups) { # function 'ss.tukey' start
 	library(multcompView) # package multcompView install needed
 	result = 0
