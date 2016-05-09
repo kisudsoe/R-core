@@ -1,7 +1,6 @@
 ﻿# 2016-05-04 WED
 ## ver 1.0	- 160504, First version using for Human X-ALD project, Yeast project
 ## Ver 1.0a - 160505, Add function for print process information out
-
 ss.tukey3Venn = function(tukey,group) { # 160504 row[2] is centered.
 	library(pbapply)
 	time1 = Sys.time()
@@ -42,7 +41,6 @@ sgnl.cerev_tukey_venn = ss.tukey3Venn(sgnl.cerev_tukey,group)
 
 # 2015 - original version
 ## Coded for general
-
 ss.venn3 = function(group1, group2, group3) { # id for each 3-groups
   
 	# Generate union group from input three groups
@@ -80,3 +78,30 @@ ss.venn3 = function(group1, group2, group3) { # id for each 3-groups
 }
 
 fc_union_id = ss.venn3(fc_Rho.HD_id,fc_Rho.LD_id,fc_HD.LD_id)
+
+
+# 2016-05-09 MON
+## ver 1.0 - 160509, Coded for general
+ss.venn2 = function(group1,group2) { #Venn for 2-groups
+	unionlist = union(group1,group2)
+	unionPr = data.frame(list=unionlist,
+                         g1=character(length(unionlist)),
+                         g2=character(length(unionlist)))
+	unionPr$g1 = group1[match(unionPr$list,group1)]
+	unionPr$g2 = group2[match(unionPr$list,group2)]
+	rownames(unionPr) = unionPr[,1]
+	unionPr[1] = NULL
+	union = (unionPr != "") # TRUE, if id exist.
+	union[is.na(union)] = FALSE # FALSE, if id null.
+	print(head(union))
+  
+	library(limma)
+	colnames(union) = c(length(group1),length(group2))
+	union = list(list=union, vennCounts=vennCounts(union))
+	vennDiagram(union$list)
+  
+	return(union)
+}
+
+sgd.Affy_venn = ss.venn2(sgd.id$gene.primaryIdentifier,
+                         sgd.Affyid$SGD.accession.number)
