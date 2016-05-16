@@ -105,3 +105,30 @@ ss.venn2 = function(group1,group2) { #Venn for 2-groups
 
 sgd.Affy_venn = ss.venn2(sgd.id$gene.primaryIdentifier,
                          sgd.Affyid$SGD.accession.number)
+						 
+# 2016-05-16 MON
+## ver 1.0 - 160516, Coded for general
+ss.venn4 = function(group1,group2,group3,group4) {
+	unionlist = union(group1,union(group2,union(group3,group4))) # Venn for 4-groups
+	unionPr = data.frame(list=unionlist,
+                         g1=character(length(unionlist)),
+						 g2=character(length(unionlist)),
+						 g3=character(length(unionlist)),
+                         g4=character(length(unionlist)))
+	unionPr$g1 = group1[match(unionPr$list,group1)]
+	unionPr$g2 = group2[match(unionPr$list,group2)]
+	unionPr$g3 = group3[match(unionPr$list,group3)]
+	unionPr$g4 = group4[match(unionPr$list,group4)]
+	rownames(unionPr) = unionPr[,1]
+	unionPr[1] = NULL
+	union = (unionPr != "") # TRUE, if id exist.
+	union[is.na(union)] = FALSE # FALSE, if id null.
+	print(head(union))
+  
+	library(limma)
+	colnames(union) = c(length(group1),length(group2),length(group3),length(group4))
+	union = list(list=union, vennCounts=vennCounts(union))
+	vennDiagram(union$list)
+  
+	return(union)
+}
