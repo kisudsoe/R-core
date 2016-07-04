@@ -39,13 +39,22 @@ ss.tukey3Venn = function(tukey,group) { # 160504 row[2] is centered.
 sgnl.cerev_tukey_venn = ss.tukey3Venn(sgnl.cerev_tukey,group)
 
 
-# 2015 - original version
+# Venn Diagram (3 circles)
+## Install limma package through biocLite
+source("https://bioconductor.org/biocLite.R")
+biocLite("limma")
+
 ## Coded for general
-ss.venn3 = function(group1, group2, group3) { # id for each 3-groups
+## v1.0 2015 - original version
+## v1.1 160704 - Add names of venn from vector
+ss.venn3 = function(group1, group2, group3,main="") { # 160704 ver - id for each 3-groups
   
 	# Generate union group from input three groups
 	unionlist = union(group1,group2)
 	unionlist = union(unionlist,group3)
+
+	# Get names from input vectors
+	title = c(names(group1)[1], names(group2)[1], names(group3)[1])
   
 	# Togethering the vectors to one dataFrame list
 	unionPr = data.frame(list=unionlist,
@@ -65,14 +74,14 @@ ss.venn3 = function(group1, group2, group3) { # id for each 3-groups
 	union[is.na(union)] = FALSE			# Transform NA to FALSE value
   
 	union = as.data.frame(union) 		# Make 'union' to data.frame form
-	colnames(union) = c(length(group1),length(group2),length(group3))
-  
-	#coln = colnames(data.frame(group1[1],group2[1],group3[1])) # Names of groups
-	#colnames(union) = coln 			# Names attach to venn diagram
+	title = c(paste(title[1],'\n',length(group1)),
+			  paste(title[2],'\n',length(group2)),
+			  paste(title[3],'\n',length(group3)))
+	colnames(union) = title 			# Names attach to venn diagram
   
 	library(limma)
 	union = list(list=union, vennCounts=vennCounts(union))
-	vennDiagram(union$list) 			# Generate Venn Diagram
+	vennDiagram(union$list,main=main) 			# Generate Venn Diagram
   
 	return(union)
 }
