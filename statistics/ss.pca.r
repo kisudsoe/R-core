@@ -98,7 +98,7 @@ PCAplot = function(PCAout,criteria,range=NULL,
     }
   }
   
-  par(xpd=TRUE)
+  #par(xpd=TRUE)
   legend("topleft",title=criteria.title,legend=criteria.lv,pch=19,col=cols)
   if(labels==TRUE) {
     text(PCAout$ind$coord,labels=rownames(res1$call$X),pos=3)
