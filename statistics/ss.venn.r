@@ -86,8 +86,15 @@ ss.venn3 = function(group1, group2, group3,main="") { # 160704 ver - id for each
 	return(union)
 }
 
-fc_union_id = ss.venn3(fc_Rho.HD_id,fc_Rho.LD_id,fc_HD.LD_id)
+id_Ensembl = unlist(read.table("clipboard"))
+id_InPara = unlist(read.table("clipboard"))
+id_Homolo = unlist(read.table("clipboard"))
 
+id_Ensembl = setNames(id_Ensembl,"Ensembl") # Set vector Name
+id_InPara = setNames(id_InPara,"InParanoid8")
+id_Homolo = setNames(id_Homolo,"HomoloGene")
+
+union_id = ss.venn3(id_Ensembl,id_InPara,id_Homolo, main="Yeast orthologs from DBs")
 
 # 2016-05-09 MON
 ## ver 1.0 - 160509, Coded for general
