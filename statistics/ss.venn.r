@@ -47,15 +47,15 @@ biocLite("limma")
 ## Coded for general
 ## v1.0 2015 - original version
 ## v1.1 160704 - Add names of venn from vector
-ss.venn3 = function(group1, group2, group3,main="") { # 160704 ver - id for each 3-groups
-  
+ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for each 3-groups
+    
 	# Generate union group from input three groups
 	unionlist = union(group1,group2)
 	unionlist = union(unionlist,group3)
 
 	# Get names from input vectors
 	title = c(names(group1)[1], names(group2)[1], names(group3)[1])
-  
+
 	# Togethering the vectors to one dataFrame list
 	unionPr = data.frame(list=unionlist,
 						 g1=character(length(unionlist)),
@@ -65,8 +65,9 @@ ss.venn3 = function(group1, group2, group3,main="") { # 160704 ver - id for each
 	unionPr$g1 = group1[match(unionPr$list,group1)]
 	unionPr$g2 = group2[match(unionPr$list,group2)]
 	unionPr$g3 = group3[match(unionPr$list,group3)]
-  
+    
 	rownames(unionPr) = unionPr[,1] 	# column 1 list as rownames
+	print(head(rownames(unionPr)))
 	unionPr[1] = NULL 					# delete column 1
   
 	# Make TRUE/FALSE table to match with ID list
