@@ -15,9 +15,12 @@ yeast = useMart("ensembl", dataset="scerevisiae_gene_ensembl")
 
 attributes = c('ensembl_gene_id','hgnc_symbol','entrezgene')
 attributesL = c('ensembl_gene_id','external_gene_name','entrezgene')
+ortho_ensem = getLDS(attributes,filters="with_homolog_scer",
+                     values=TRUE,mart=human, # values=TRUE : all exist values
+                     attributesL=attributesL,martL=yeast)
 
-ortho_ensem = getLDS(attributes,filters="with_homolog_scer",values=TRUE,mart=human,
-                     attributesL=attributesL,martL=yeast) # values=TRUE : all exist values
+ortho_ensem_egid_human = na.omit(unique(ortho_ensem$EntrezGene.ID))
+ortho_ensem_egid_yeast = na.omit(unique(ortho_ensem$EntrezGene.ID.1))
 
 # > head(ortho_ensem)
 #   Ensembl.Gene.ID HGNC.symbol EntrezGene.ID Ensembl.Gene.ID.1 Associated.Gene.Name EntrezGene.ID.1
@@ -28,7 +31,7 @@ ortho_ensem = getLDS(attributes,filters="with_homolog_scer",values=TRUE,mart=hum
 # 5 ENSG00000152556        PFKM          5213           YGR240C                 PFK1          853155
 # 6 ENSG00000099365       STX1B        112755           YMR183C                 SSO2          855221
 
-## To see list of ensembl data ##
+### To see list of ensembl data ###
 ensembl=useMart("ensembl")
 View(listDatasets(ensembl)) # To find database list
 
@@ -37,6 +40,7 @@ View(listFilters(human))    # To find filter list
 
 
 # 2. Orthologs from Inparanoid human
+## https://bioconductor.org/packages/release/data/annotation/html/hom.Hs.inp.db.html
 library(hom.Hs.inp.db)
 ls("package:hom.Hs.inp.db")
 as.list(hom.Hs.inpSACCE)[1:4] # What data in this?
@@ -62,35 +66,100 @@ ortho_inpara = dbGetQuery(hom.Hs.inp_dbconn(),
 #                            "SELECT * FROM Homo_sapiens;") # Same as data from human
 
 ## Ensembl search of 'Ortho_inpara' to get EntrezGene ID
-ens.getBM = function(inp_id,species){
-  attributes = c('ensembl_gene_id','external_gene_name','entrezgene')
-  if(species=="HOMSA"){
-    BM = getBM(attributes=attributes, filters="ensembl_peptide_id",
-                   values=inp_id, mart=human)
-    nrow = round(length(unlist(BM))/3,0)
-    out = data.frame(matrix(unlist(BM),nrow=nrow,byrow=F))
-  } else if(species=="SACCE"){
-    BM = getBM(attributes=attributes, filters="ensembl_gene_id",
-                   values=inp_id, mart=yeast)
-    nrow = round(length(unlist(BM))/3,0)
-    out = data.frame(matrix(unlist(BM),nrow=nrow,byrow=F))
+ens.getBM = function(query_ids,filter,marts,labels){
+  attributes = c('ensembl_peptide_id','ensembl_gene_id',
+                 'external_gene_name','entrezgene')
+  i = 1
+  n = length(marts)
+  out = data.frame()
+  for(mart in marts) {
+    rst = getBM(attributes=attributes, filters=filter,
+                values=query_ids, mart=mart)
+    speci = rep(labels[i],length(rst[,1]))
+    rst = data.frame(rst,Species=speci)
+    out = rbind(out,rst)
+    cat(paste(i,'=',labels[i],'>>',length(rst[,1]),'\n'))
+    i = i+1
   }
-  if(length(out)==0){
-    nrow = 0
-    out = data.frame(X1=inp_id,X2='NA',X3='NA',X4='NA',X5=nrow)
-  } else { out = cbind(rep(inp_id,nrow),out,rep(nrow)) }
-  names(out) = c('inp_id',names(BM),'nrow')
+  
   return(out)
 }
 
-ens.multi = function(ortho_inpara){
-  n = length(ortho_inpara[,1])
-  nms = data.frame()
+ortho_inpara_names = ens.getBM(query_ids=ortho_inpara$inp_id,
+                               filter="ensembl_peptide_id",
+                               marts=c(human,yeast),
+                               labels=c('H_sapiens','S_cerevisiae'))
+head(ortho_inpara_names)
+dim(ortho_inpara_names)
+summary(factor(ortho_inpara_names$Species))
+
+ortho_inpara_human_id = which(ortho_inpara_names$Species=="H_sapiens")
+ortho_inpara_yeast_id = which(ortho_inpara_names$Species=="S_cerevisiae")
+ortho_inpara_egid_human = na.omit(unique(ortho_inpara_names$entrezgene[ortho_inpara_human_id]))
+ortho_inpara_egid_yeast = na.omit(unique(ortho_inpara_names$entrezgene[ortho_inpara_yeast_id]))
+
+## Compiling EntrezGene ID annotation to Inparanoid orthologs
+ss.annot = function(origin,annot){ # First columns of both entries should be IDs
+  out = data.frame()
+  i = 1
+  n = length(origin[,1])
+  print(paste0('iteration= ',n))
+  for(id in origin[,1]) {
+    ann_row = which(annot[,1]==id)
+    annNum = length(ann_row)
+    if(annNum==0) {
+      annot_row = data.frame(origin[i,],ensembl_gene_id=NA,
+                             external_gene_name=NA,entrezgene=NA,
+                             Species=NA,annNum=annNum)
+    } else {
+      annot_row = data.frame(origin[i,],annot[ann_row,2:5],annNum=annNum)
+    }
+    out = rbind(out,annot_row)
+    #######################
+    # Create progress bar #
+    #######################
+    if(i==1) { # set progress bar
+      cat('\nProcess iteration =',n,'\n')
+      pb = txtProgressBar(min=0,max=100,width=30,initial=0,style=3)
+      time1 = Sys.time()
+    } else { setTxtProgressBar(pb, (i/n)*100) } # show progress bar
+    if(i==n) { # Duration time check
+      close(pb)
+      time2 = Sys.time()
+      cat('\n')
+      print(time2-time1)
+    } 
+    #######################
+    i = i+1
+  }
+  return(out)
+}
+ortho_inpara_ann = ss.annot(ortho_inpara, ortho_inpara_names) # ignore warning message
+summary(factor(ortho_inpara_ann$annNum))
+
+
+## 3. get orthologs from HomoloGene
+library(annotationTools)
+browseVignettes("annotationTools")
+
+homologene = read.delim("D:/KimSS-NAS/LFG/Works/2016.04 Human X-ALD/(Archive) Orthologs/Hs-Sc/homologene_build68.data.tsv", header=FALSE)
+colnames(homologene) = c('HID','TaxId','GeneId','GeneSymbol','Proteingi','Proteinacc')
+
+homo.filter = function(homo_db) {
+  human_rows = which(homo_db$TaxId=="9606")
+  yeast_rows = which(homo_db$TaxId=="4932")
+  hu.ye_rows_union = union(human_rows,yeast_rows)
+  
+  human_hid = homo_db$HID[human_rows]
+  yeast_hid = homo_db$HID[yeast_rows]
+  hu.ye_hid = intersect(human_hid,yeast_hid)
+  
+  n = length(hu.ye_hid)
+  out = data.frame()
   for(i in 1:n){
-    inp_id = ortho_inpara[i,1]
-    species = ortho_inpara[i,3]
-    nms.tmp = ens.getBM(inp_id,species)
-    nms = rbind(nms,nms.tmp)
+    hu.ye_hid_rows = which(homo_db$HID==hu.ye_hid[i])
+    hu.ye_rows = intersect(hu.ye_rows_union,hu.ye_hid_rows)
+    out = rbind(out,homo_db[hu.ye_rows,])
     #######################
     # Create progress bar #
     #######################
@@ -107,8 +176,164 @@ ens.multi = function(ortho_inpara){
     } 
     #######################
   }
-  return(nms)
+
+  return(out)
 }
 
-ortho_inpara_ensembl = ens.multi(ortho_inpara)
-summary(factor(ortho_inpara_names$nrow))
+ortho_homo = homo.filter(homologene)
+summary(factor(ortho_homo$TaxId))
+
+ortho_homo_human_id = which(ortho_homo$TaxId=="9606")
+ortho_homo_yeast_id = which(ortho_homo$TaxId=="4932")
+ortho_homo_egid_human = na.omit(unique(ortho_homo$GeneId[ortho_homo_human_id]))
+ortho_homo_egid_yeast = na.omit(unique(ortho_homo$GeneId[ortho_homo_yeast_id]))
+
+### Homologene - TaxId ###
+# 9606	Homo sapiens
+# 4932	Saccharomyces cerevisiae
+# ---   ---
+# 10090	Mus musculus
+# 10116	Rattus norvegicus
+# 28985	Kluyveromyces lactis
+# 318829	Magnaporthe oryzae
+# 33169	Eremothecium gossypii
+# 3702	Arabidopsis thaliana
+# 4530	Oryza sativa
+# 4896	Schizosaccharomyces pombe
+# 5141	Neurospora crassa
+# 6239	Caenorhabditis elegans
+# 7165	Anopheles gambiae
+# 7227	Drosophila melanogaster
+# 7955	Danio rerio
+# 8364	Xenopus (Silurana) tropicalis
+# 9031	Gallus gallus
+# 9544	Macaca mulatta
+# 9598	Pan troglodytes
+# 9615	Canis lupus familiaris
+# 9913	Bos taurus
+
+## Get ensembl_gene_id from entrez Id of homologene orthologs
+attributesH = c('entrezgene','ensembl_gene_id','external_gene_name')
+ortho_homo_names = ens.getBM(query_ids=ortho_homo$GeneId,
+                             attri=attributesH,
+                             filter="entrezgene",
+                             marts=c(human,yeast),
+                             labels=c('H_sapiens','S_cerevisiae'))
+ortho_homo_ann = ss.annot(ortho_homo, ortho_homo_names) # ignore warning message
+summary(factor(ortho_homo_ann$annNum))
+
+
+## 4. Venn analysis of orthologs
+### using 'ss.venn3' function - 160704 ver
+ortho_ensem_egid_human = setNames(ortho_ensem_egid_human,"Ensembl_human")
+ortho_inpara_egid_human = setNames(ortho_inpara_egid_human,"Inparanoid_human")
+ortho_homo_egid_human = setNames(ortho_homo_egid_human,"HomoloGene_human")
+
+source("https://bioconductor.org/biocLite.R")
+biocLite("limma")
+ortho_union_egid_human = ss.venn3(ortho_ensem_egid_human,ortho_inpara_egid_human,
+                    ortho_homo_egid_human, main="Human-Yeast orthologs (Human) from DBs")
+length(ortho_union_egid_human$list[,1])
+
+ortho_ensem_egid_yeast = setNames(ortho_ensem_egid_yeast,"Ensembl_yeast")
+ortho_inpara_egid_yeast = setNames(ortho_inpara_egid_yeast,"Inparanoid_yeast")
+ortho_homo_egid_yeast = setNames(ortho_homo_egid_yeast,"HomoloGene_yeast")
+
+ortho_union_egid_yeast = ss.venn3(ortho_ensem_egid_yeast,ortho_inpara_egid_yeast,
+                            ortho_homo_egid_yeast, main="Human-Yeast orthologs (Yeast) from DBs")
+length(ortho_union_egid_yeast$list[,1])
+
+
+## 5. Search target orthologs
+ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene")){
+  ensem = data.frame()
+  inpara = data.frame()
+  homol = data.frame()
+  out = data.frame()
+  i=1
+  for(target in targets){
+    if(!is.numeric(target)){
+      target = toupper(target) # Capital charater
+      #target = paste0('^',toupper(target),'$')
+    } else if(i==1){ print("target is numeric") }
+    
+    ## Search ensembl DB
+    if("ensembl" %in% dblist){
+      if(is.numeric(target)){
+        ensem_etz = data.frame(ortho_ensem$EntrezGene.ID,ortho_ensem$EntrezGene.ID.1)
+        ensem_rows = which(apply(ensem_etz,1,function(x) any(which(x==target))))
+      } else {
+        ensem_rows = which(apply(ortho_ensem,1,function(x) any(which(x==target))))
+      }
+      #ensem = rbind(ensem,ortho_ensem[ensem_rows,])
+      ensem_hu = unique(ortho_ensem[ensem_rows,1:3])
+      if(length(ensem_hu[,1])!=0){
+        ensem_hu = data.frame(ensem_hu,Species="H_sapiens",Group=paste0("q",i))
+        names(ensem_hu) = c("Ensembl.Gene.ID","Gene.Symbol",
+                            "EntrezGene.ID","Species","Group")
+      } else { ensem_hu = NULL }
+      ensem_ye = unique(ortho_ensem[ensem_rows,4:6])
+      if(length(ensem_ye[,1])!=0){
+        ensem_ye = data.frame(ensem_ye,Species="S_cerevisiae",Group=paste0("q",i))
+        names(ensem_ye) = c("Ensembl.Gene.ID","Gene.Symbol",
+                            "EntrezGene.ID","Species","Group")
+      } else { ensem_ye = NULL }
+      ensem = rbind(ensem,ensem_hu,ensem_ye)
+    }
+    
+    ## Search inparanoid DB with annotataion
+    if("inparanoid" %in% dblist){
+      if(is.numeric(target)){
+        inp_id_row = which(ortho_inpara_ann$entrezgene==target)
+      } else {
+        inp_id_row = which(apply(ortho_inpara_ann,1,function(x) any(which(x==target))))
+      }
+      inp_cid = unique(ortho_inpara_ann[inp_id_row,2])
+      inp_cid_rows = which(ortho_inpara_ann$clust_id==inp_cid)
+      #inpara = rbind(inpara,ortho_inpara_ann[inp_cid_rows,])
+      inpara_tmp = unique(ortho_inpara_ann[inp_cid_rows,c(6:9,2)])
+      names(inpara_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","cid")
+      inpara = rbind(inpara,inpara_tmp)
+    }
+    
+    ## Search homologene DB with annotation
+    if("homologene" %in% dblist){
+      if(is.numeric(target)){
+        homo_id_row = which(ortho_homo_ann$GeneId==target)
+      } else {
+        homo_id_row = which(apply(ortho_homo_ann,1,function(x) any(which(x==target))))
+      }
+      homo_hid = unique(ortho_homo_ann[homo_id_row,3])
+      homo_hid_rows = which(ortho_homo_ann$HID==homo_hid)
+      #homol = rbind(homol,ortho_homo_ann[homo_hid_rows,])
+      homol_tmp = unique(ortho_homo_ann[homo_hid_rows,c(6,2,1,8,3)])
+      names(homol_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","HID")
+      homol = rbind(homol,homol_tmp)
+    }
+    i = i+1
+  }
+  #cat("\n\nensem\n")
+  #print(ensem)
+  #cat("\n\ninpara\n")
+  #print(inpara)
+  #cat("\n\nhomol\n")
+  #print(homol)
+  
+  unionlist = rbind(ensem[,1:4],inpara[,1:4],homol[,1:4])
+  unionlist = unique(unionlist)
+  unionTb = data.frame(unionlist,
+                       Ensembl=character(length(unionlist[,1])),
+                       Inparanoid=character(length(unionlist[,1])),
+                       Homologene=character(length(unionlist[,1])))
+  unionTb$Ensembl    = ensem[match(unionTb[,1],ensem[,1]),5]
+  unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),5]
+  unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),5]
+  out = unionTb
+  
+  return(out)
+}
+
+ortho.genes(target=c("PXA1","PXA2"))
+ortho.genes(target="ABCD1")
+ortho.genes(target=c(6520,215,5594))
+ortho.genes(target=c("SLC3A2","ABCD1","MAPK1"))
