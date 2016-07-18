@@ -107,6 +107,11 @@ ss.annot = function(origin,annot){ # First columns of both entries should be IDs
   for(id in origin[,1]) {
     ann_row = which(annot[,1]==id)
     annNum = length(ann_row)
+    # 160717_bugfix: fill blanks
+    if(length(apply(origin[i,],2, function(x) which(x=="")))>0){
+      for(j in 1:length(origin[i,])) {
+        if(origin[i,j]==""){ origin[i,j]="NA" }
+    } } # end script #
     if(annNum==0) {
       annot_row = data.frame(origin[i,],ensembl_gene_id=NA,
                              external_gene_name=NA,entrezgene=NA,
@@ -245,12 +250,11 @@ length(ortho_union_egid_yeast$list[,1])
 
 
 ## 5. Search target orthologs
-ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene")){
-  ensem = data.frame()
-  inpara = data.frame()
-  homol = data.frame()
-  out = data.frame()
-  i=1
+ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
+                       Tbform=1){ # Tbform=1(cluster table)/2(1:1 match table)
+  ensem = data.frame(); inpara = data.frame()
+  homol = data.frame(); out = data.frame()
+  n=length(targets); i=1
   for(target in targets){
     if(!is.numeric(target)){
       target = toupper(target) # Capital charater
@@ -265,21 +269,27 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene")){
       } else {
         ensem_rows = which(apply(ortho_ensem,1,function(x) any(which(x==target))))
       }
-      #ensem = rbind(ensem,ortho_ensem[ensem_rows,])
-      ensem_hu = unique(ortho_ensem[ensem_rows,1:3])
-      if(length(ensem_hu[,1])!=0){
-        ensem_hu = data.frame(ensem_hu,Species="H_sapiens",Group=paste0("q",i))
-        names(ensem_hu) = c("Ensembl.Gene.ID","Gene.Symbol",
-                            "EntrezGene.ID","Species","Group")
-      } else { ensem_hu = NULL }
-      ensem_ye = unique(ortho_ensem[ensem_rows,4:6])
-      if(length(ensem_ye[,1])!=0){
-        ensem_ye = data.frame(ensem_ye,Species="S_cerevisiae",Group=paste0("q",i))
-        names(ensem_ye) = c("Ensembl.Gene.ID","Gene.Symbol",
-                            "EntrezGene.ID","Species","Group")
-      } else { ensem_ye = NULL }
-      ensem = rbind(ensem,ensem_hu,ensem_ye)
-    }
+      if(Tbform==1 & length(ensem_rows>0)) {
+        ensem_tmp = data.frame(ortho_ensem[ensem_rows,],Group=paste0("q",i))
+        names(ensem_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID",
+                             "Ensembl.Gene.ID.1","Gene.Symbol.1","EntrezGene.ID.1",
+                             "Group")
+        ensem = rbind(ensem,ensem_tmp)
+      } else if(Tbform==2) {
+        ensem_hu = unique(ortho_ensem[ensem_rows,1:3])
+        if(length(ensem_hu[,1])!=0){
+          ensem_hu = data.frame(ensem_hu,Species="H_sapiens",Group=paste0("q",i))
+          names(ensem_hu) = c("Ensembl.Gene.ID","Gene.Symbol",
+                              "EntrezGene.ID","Species","Group")
+        } else { ensem_hu = NULL }
+        ensem_ye = unique(ortho_ensem[ensem_rows,4:6])
+        if(length(ensem_ye[,1])!=0){
+          ensem_ye = data.frame(ensem_ye,Species="S_cerevisiae",Group=paste0("q",i))
+          names(ensem_ye) = c("Ensembl.Gene.ID","Gene.Symbol",
+                              "EntrezGene.ID","Species","Group")
+        } else { ensem_ye = NULL }
+        ensem = rbind(ensem,ensem_hu,ensem_ye)
+      } }
     
     ## Search inparanoid DB with annotataion
     if("inparanoid" %in% dblist){
@@ -290,11 +300,23 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene")){
       }
       inp_cid = unique(ortho_inpara_ann[inp_id_row,2])
       inp_cid_rows = which(ortho_inpara_ann$clust_id==inp_cid)
-      #inpara = rbind(inpara,ortho_inpara_ann[inp_cid_rows,])
-      inpara_tmp = unique(ortho_inpara_ann[inp_cid_rows,c(6:9,2)])
-      names(inpara_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","cid")
-      inpara = rbind(inpara,inpara_tmp)
-    }
+      if(Tbform==1) {
+        #inpara = rbind(inpara,ortho_inpara_ann[inp_cid_rows,])
+        inpara_tmp = unique(ortho_inpara_ann[inp_cid_rows,])
+        hu_id = which(inpara_tmp$species=="HOMSA")
+        ye_id = which(inpara_tmp$species=="SACCE")
+        for(id in hu_id) {
+          inpara_hu.ye = cbind(inpara_tmp[id,6:8],inpara_tmp[ye_id,6:8],
+                               inpara_tmp[ye_id,2])
+          names(inpara_hu.ye) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID",
+                                  "Ensembl.Gene.ID.1","Gene.Symbol.1","EntrezGene.ID.1","cid")
+          inpara = rbind(inpara,inpara_hu.ye)
+        }
+      } else if(Tbform==2) {
+        inpara_tmp = unique(ortho_inpara_ann[inp_cid_rows,c(6:9,2)])
+        names(inpara_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","cid")
+        inpara = rbind(inpara,inpara_tmp)
+      } }
     
     ## Search homologene DB with annotation
     if("homologene" %in% dblist){
@@ -305,29 +327,68 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene")){
       }
       homo_hid = unique(ortho_homo_ann[homo_id_row,3])
       homo_hid_rows = which(ortho_homo_ann$HID==homo_hid)
-      #homol = rbind(homol,ortho_homo_ann[homo_hid_rows,])
-      homol_tmp = unique(ortho_homo_ann[homo_hid_rows,c(6,2,1,8,3)])
-      names(homol_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","HID")
-      homol = rbind(homol,homol_tmp)
-    }
+      if(Tbform==1) {
+        #homol = rbind(homol,ortho_homo_ann[homo_hid_rows,])
+        homol_tmp = unique(ortho_homo_ann[homo_hid_rows,])
+        hu_id = which(homol_tmp$Species=="H_sapiens")
+        ye_id = which(homol_tmp$Species=="S_cerevisiae")
+        for(id in hu_id) {
+          homol_hu.ye = cbind(homol_tmp[id,c(6,7,5)],homol_tmp[ye_id,c(6,7,5)],
+                              homol_tmp[ye_id,3])
+          names(homol_hu.ye) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID",
+                                 "Ensembl.Gene.ID.1","Gene.Symbol.1","EntrezGene.ID.1","HID")
+          homol = rbind(homol,homol_hu.ye)
+        }
+      } else if(Tbform==2) {
+        homol_tmp = unique(ortho_homo_ann[homo_hid_rows,c(6,2,1,8,3)])
+        names(homol_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","HID")
+        homol = rbind(homol,homol_tmp)
+      } }
+    
+    #######################
+    # Create progress bar #
+    #######################
+    if(i==1) { # set progress bar
+      cat('\nProcess iteration =',n,'\n')
+      pb = txtProgressBar(min=0,max=100,width=30,initial=0,style=3)
+      time1 = Sys.time()
+    } else { setTxtProgressBar(pb, (i/n)*100) } # show progress bar
+    if(i==n) { # Duration time check
+      close(pb)
+      time2 = Sys.time()
+      cat('\n')
+      print(time2-time1)
+    } 
+    #######################
     i = i+1
   }
-  #cat("\n\nensem\n")
-  #print(ensem)
-  #cat("\n\ninpara\n")
-  #print(inpara)
-  #cat("\n\nhomol\n")
-  #print(homol)
   
-  unionlist = rbind(ensem[,1:4],inpara[,1:4],homol[,1:4])
+  if(Tbform==1) { # Compiling union table as 1:1 match
+    ## bugfix_160718
+    Tb = data.frame(Ensembl.Gene.ID=character(0),
+                    Gene.Symbol=character(0),
+                    EntrezGene.ID=character(0),
+                    Ensembl.Gene.ID.1=character(0),
+                    Gene.Symbol.1=character(0),
+                    EntrezGene.ID.1=character(0))
+    if(length(ensem)==0) {
+      ensem = data.frame(Tb, Group=character(0)) }
+    if(length(inpara)==0) {
+      inpara = data.frame(Tb, cid=character(0)) }
+    if(length(homol)==0) {
+      homol = data.frame(Tb, HID=character(0)) }
+    cola=6; colb=7
+  } else if(Tbform==2) { cola=4; colb=5 } # Compiling union table as group result
+  
+  unionlist = rbind(ensem[,1:cola],inpara[,1:cola],homol[,1:cola])
   unionlist = unique(unionlist)
   unionTb = data.frame(unionlist,
                        Ensembl=character(length(unionlist[,1])),
                        Inparanoid=character(length(unionlist[,1])),
                        Homologene=character(length(unionlist[,1])))
-  unionTb$Ensembl    = ensem[match(unionTb[,1],ensem[,1]),5]
-  unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),5]
-  unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),5]
+  unionTb$Ensembl    = ensem[match(unionTb[,1],ensem[,1]),colb]
+  unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),colb]
+  unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),colb]
   out = unionTb
   
   return(out)
