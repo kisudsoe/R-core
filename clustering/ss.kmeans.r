@@ -17,11 +17,9 @@
 # 10419568	146.9885533	121.0265701	136.6896313	16.03664006	48.78277761	35.32677143	18.50149569	25.46811008	14.80025369	18.43774098	15.73385186	19.84632529
 # 10467744	419.7190108	315.4570974	446.5630275	75.72774164	325.424712	409.2021741	45.49323114	49.07274265	60.52922608	41.11434671	29.76242139	42.24415982
 ##################################################
-
-data = input(3)
  
-ss.kmeans = function(data,i) {
-	km = kmeans(t(scale(t(data))),i) 
+ss.kmeans = function(data,k,hr=TRUE,hc=TRUE) {
+	km = kmeans(t(scale(t(data))),k) 
 		# K-menas clustering
 		# row-wise scaling returns a mean close to zero and 
 		# a standard deviation of one.
@@ -33,22 +31,31 @@ ss.kmeans = function(data,i) {
 	mycol <- mycol[as.vector(km$cluster)]
  
 	# Hierarchical clustering #
+	## Correlation methods = "Pearson", "Kendall", "Spearman"
+	## hclust methods = "complete", "average", "median", "centroid", etc.
 	data.mat = as.matrix(data)
-	hr = hclust(as.dist(1-cor(t(data.mat),method="pearson")),method="complete")
-	hc = hclust(as.dist(1-cor(data.mat, method="spearman")),method="complete")
-		# Correlation methods = "Pearson", "Kendall", "Spearman"
-		# hclust methods = "complete", "average", "median", "centroid", etc.
-	source("http://faculty.ucr.edu/~tgirke/Documents/R_BioCond/My_R_Scripts/my.colorFct.R")
-	#heatmap(data.mat, 
-	#        Rowv=as.dendrogram(hr), 
-	#        Colv=as.dendrogram(hc), 
-	#        col=my.colorFct(), 
-	#        scale="row")
-  
+	if(hr==TRUE) {
+		hr = hclust(as.dist(1-cor(t(data.mat),method="pearson")),method="complete")
+		hr.dd = as.dendrogram(hr)
+	} else { hr.dd=FALSE }
+	if(hc==TRUE) {
+		hc = hclust(as.dist(1-cor(data.mat, method="spearman")),method="complete")
+		hc.dd = as.dendrogram(hc)
+	} else { hc.dd=FALSE }
+		
+	#source("http://faculty.ucr.edu/~tgirke/Documents/R_BioCond/My_R_Scripts/my.colorFct.R")
+	# Color function to generate blue-yellow heat maps
+	my.colorFct <- function(n = 50, low.col = 0.5, high.col=0.17, saturation = 1) { 
+		if (n < 2) stop("n must be greater than 2")
+		n1 <- n%/%2
+		n2 <- n - n1
+		c(hsv(low.col, saturation, seq(1,0,length=n1)), hsv(high.col, saturation, seq(0,1,length=n2))) 
+	}
+
 	# Draw heatmap #
 	heatmap(data.mat, 
-			Rowv=as.dendrogram(hr), 
-			Colv=as.dendrogram(hc), 
+			Rowv=hr.dd, 
+			Colv=hc.dd, 
 			col=my.colorFct(), 
 			scale="row", 
 			#ColSideColors=heat.colors(length(hc$labels)), 
