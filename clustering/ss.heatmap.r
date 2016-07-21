@@ -78,12 +78,14 @@ write.table(heatmap,"heatmap.csv",sep=",",row.names=TRUE)
 # ?heatmap.2; http://127.0.0.1:23779/library/gplots/html/heatmap.2.html
 
 
-## try http:// if https:// URLs are not supported
+## ss.heatmap version 2
+## v2.0  160721 - Fisrt written
 source("https://bioconductor.org/biocLite.R")
 biocLite("ComplexHeatmap")
+install.packages("dendsort")
 
-ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
-	library(ComplexHeatmap); library(circlize)
+ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=TRUE,hc.order=NULL) {
+	library(ComplexHeatmap); library(circlize); library(dendsort)
 	mat = as.matrix(data)
 	mat.s = t(scale(t(mat))) # scale by row-lines
 	mat.s_max = max(mat.s)
@@ -92,33 +94,47 @@ ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=
 	if(length(colrange)>0) {col.rg = colrange}
 
 	colGroup = data.frame(Sample=c(rep("WL",3),rep("Og",3),rep("Bl",3),rep("Hw",3),rep("Ya",3)))
-	col.fa = rainbow(5)
-	print("col.fa=rainbow(5)")
-	ha = HeatmapAnnotation(df=colGroup,
-				col=list(Samples=c("WL"=col.fa[1],"Og"=col.fa[2],
-				"Bl"=col.fa[3],"HW"=col.fa[4],"Ya"=col.fa[5])))
+	ha = HeatmapAnnotation(df=colGroup) #,
+				#col=list(Samples=c("WL"="FF0000","Og"="#CCFF00",
+				#"Bl"="#00FF66","HW"="#0066FF","Ya"="#CC00FF")))
 	
-	if(length(row.col)>0) {
-		ra = rowAnnotation(row.col,
-		    col=list(Group=c("W"=col.fa[1],"O"=col.fa[2],"B"=col.fa[3],"H"=col.fa[4],"Y"=col.fa[5]), Marker=c("-"="grey80","mk"="yellow")), width=unit(1,"cm"))
-	}
+	#ra = rowAnnotation(row.col,
+		#    col=list(Group=c("W"=col.fa[1],"O"=col.fa[2],"B"=col.fa[3],"H"=col.fa[4],"Y"=col.fa[5]), 
+		#    Marker=c("-"="grey80","mk"="yellow")), width=unit(1,"cm"))
 
-	if(hc==TRUE) {hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")}
-	if(hr==TRUE) {hclust(as.dist(1-cor(t(mat),method="pearson")),method="complete")}
-	column_dend_reorder = hc.order #<-??
+	if(hc==TRUE) {
+		hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")
+		hc.dd = as.dendrogram(hc)
+	} else {hc.dd=FALSE}
+	if(hr==TRUE) {
+		hr = hclust(as.dist(1-cor(t(mat),method="pearson")),method="complete")
+		hr.dd = as.dendrogram(hr)
+	} else {hr.dd=FALSE}
+	print(order.dendrogram(hc.dd))
+	hc.dd = rotate(hc.dd,hc.order) #rotate dendrogram leafs
+	print(order.dendrogram(hc.dd))
 	cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
 
-	ht = Heatmap(mat.s, col=cell.cols,
+	Heatmap(mat.s, col=cell.cols,
 			name = "Probeset\nintensity\n(Scaled)",
-			cluster_rows=hr,cluster_columns=hc,
+			cluster_rows=hr.dd,cluster_columns=hc.dd,
 			top_annotation=ha,
 			column_dend_height=unit(3,"cm"),
-			column_dend_reorder=column_dend_reorder,
-			row_dend_width=unit(3,"cm"))
-	draw(ra + ht)
+			column_dend_reorder=FALSE,
+			row_dend_width=unit(3,"cm"),
+			row_names_side = "left",
+			row_names_gp = gpar(fontsize=7)) +
+	Heatmap(row.col2,name="Group",col=c("-"="black","+"="#990000"),width=unit(3,"cm"))+
+	Heatmap(row.col,name="Marker",col=c("-"="grey80","marker"="yellow"),
+			show_row_names=TRUE,
+			row_names_gp = gpar(fontsize=7),
+			width=unit(0.5,"cm"))
+	#draw(ra + ht)
 }
 ss.heatmap2(data.arr.heat, hr=FALSE,hc=TRUE,
-			row.col=data.frame(Marker,Group),
-			hc.order=c(1,2,3,5,6,4,7,8,9,11,12,10,13,14,15))
-			#hc.order=c(1:15))
+			row.col=Marker,
+			row.col2=Group,
+			hc.order=c("WL.1","WL.2","WL.3","Og.2","Og.3","Og.1",
+			"Bl.1","Bl.2","Bl.3","Hw.2","Hw.3","Hw.1","Ya.1","Ya.2","Ya.3"))
+
 ss.heatmap2(data.arr.heat,colrange=c(-2,0,2), hr=FALSE,hc=TRUE)
