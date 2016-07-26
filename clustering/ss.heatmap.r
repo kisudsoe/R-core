@@ -86,6 +86,7 @@ install.packages("dendsort")
 
 ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=TRUE,hc.order=NULL) {
 	library(ComplexHeatmap); library(circlize); library(dendsort)
+	
 	mat = as.matrix(data)
 	mat.s = t(scale(t(mat))) # scale by row-lines
 	mat.s_max = max(mat.s)
@@ -97,11 +98,9 @@ ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=
 	ha = HeatmapAnnotation(df=colGroup) #,
 				#col=list(Samples=c("WL"="FF0000","Og"="#CCFF00",
 				#"Bl"="#00FF66","HW"="#0066FF","Ya"="#CC00FF")))
-	
 	#ra = rowAnnotation(row.col,
 		#    col=list(Group=c("W"=col.fa[1],"O"=col.fa[2],"B"=col.fa[3],"H"=col.fa[4],"Y"=col.fa[5]), 
 		#    Marker=c("-"="grey80","mk"="yellow")), width=unit(1,"cm"))
-
 	if(hc==TRUE) {
 		hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")
 		hc.dd = as.dendrogram(hc)
