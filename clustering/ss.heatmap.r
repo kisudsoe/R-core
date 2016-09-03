@@ -14,7 +14,7 @@ ss.heatmap = function(data,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
 	} else {
 		row.cols = NULL
 	}
- 
+
 	# Hierarchical clustering #
 	## Correlation methods = "Pearson", "Kendall", "Spearman"
 	## hclust methods = "complete", "average", "median", "centroid", etc.
@@ -34,15 +34,15 @@ ss.heatmap = function(data,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
 			print(order.dendrogram(hc.dd))
 		}
 	}
-	
+
 	#source("http://faculty.ucr.edu/~tgirke/Documents/R_BioCond/My_R_Scripts/my.colorFct.R")
 	# Color function to generate blue-yellow heat maps
 	#png(filename="heatmap.png", width=400, height=1080) # Set session address before use
-	my.colorFct <- function(n = 50, low.col = 0.5, high.col=0.17, saturation = 1) { 
+	my.colorFct <- function(n = 50, low.col = 0.5, high.col=0.17, saturation = 1) {
 		if (n < 2) stop("n must be greater than 2")
 		n1 <- n%/%2
 		n2 <- n - n1
-		c(hsv(low.col, saturation, seq(1,0,length=n1)), hsv(high.col, saturation, seq(0,1,length=n2))) 
+		c(hsv(low.col, saturation, seq(1,0,length=n1)), hsv(high.col, saturation, seq(0,1,length=n2)))
 	}
 
 	# load heatmap.3 from url
@@ -53,7 +53,7 @@ ss.heatmap = function(data,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
 			Rowv=hr.dd,
 			RowSideColors=row.cols,
 			## columns
-			Colv=hc.dd, 
+			Colv=hc.dd,
 			ColSideColors=col.cols,
 			scale="row", # scale 기준방향 설정
 			trace="non",
@@ -64,7 +64,7 @@ ss.heatmap = function(data,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
 	#dev.off()
 	return()
 }
- 
+
 tmp = ss.heatmap(data.arr.heat,
                  row.col=data.arr$Marker,
                  hr=FALSE, hc=TRUE,
@@ -85,8 +85,8 @@ biocLite("ComplexHeatmap")
 install.packages("dendsort")
 
 ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=TRUE,hc.order=NULL) {
-	library(ComplexHeatmap); library(circlize); library(dendsort)
-	
+	library(ComplexHeatmap); library(circlize); library(dendsort); library(dendextend)
+
 	mat = as.matrix(data)
 	mat.s = t(scale(t(mat))) # scale by row-lines
 	mat.s_max = max(mat.s)
@@ -99,7 +99,7 @@ ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=
 				#col=list(Samples=c("WL"="FF0000","Og"="#CCFF00",
 				#"Bl"="#00FF66","HW"="#0066FF","Ya"="#CC00FF")))
 	#ra = rowAnnotation(row.col,
-		#    col=list(Group=c("W"=col.fa[1],"O"=col.fa[2],"B"=col.fa[3],"H"=col.fa[4],"Y"=col.fa[5]), 
+		#    col=list(Group=c("W"=col.fa[1],"O"=col.fa[2],"B"=col.fa[3],"H"=col.fa[4],"Y"=col.fa[5]),
 		#    Marker=c("-"="grey80","mk"="yellow")), width=unit(1,"cm"))
 	if(hc==TRUE) {
 		hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")
