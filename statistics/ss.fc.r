@@ -8,7 +8,7 @@ ss.fc = function(data,group) {
 	n = length(group.lv)
 	cat('Level(s) of group =',group.lv,'\n\n')
 	avs = NULL
-  
+
 	# Step 1. Calculate average of each group
 	for(i in 1:n) {
 		av = pbapply(data[,which(group==group.lv[i])],1,mean) # apply: 1-rows, 2-columns
@@ -23,17 +23,17 @@ ss.fc = function(data,group) {
 	fcs = NULL
 	fc.col = NULL
 	for(i in 1:m) {
-		fc.col = c(fc.col,paste(group.lv[comb[2,i]],'/',
-								group.lv[comb[1,i]],sep=""))
+		fc.col = c(fc.col,paste(group.lv[comb[1,i]],'/',
+								group.lv[comb[2,i]],sep=""))
 		cat('Process =',i,'/',m,'\n')
-		fc = avs[,comb[2,i]]-avs[,comb[1,i]]
+		fc = avs[,comb[1,i]]-avs[,comb[2,i]]
 		fcs = cbind(fcs, fc)
 	}
 	colnames(fcs) = fc.col
 	print(head(fcs))
 	fcs2 = apply(fcs,2,function(x){ifelse(x<0,-2^(-x),2^x)}) # apply: 1-rows, 2-columns
 	print(head(fcs2))
-  
+
 	# Step 3. Collect results
 	#out = as.data.frame(cbind(avs,fcs,fcs2))
 	return(as.data.frame(fcs2))
