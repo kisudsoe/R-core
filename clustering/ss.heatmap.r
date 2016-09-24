@@ -83,6 +83,8 @@ write.table(heatmap,"heatmap.csv",sep=",",row.names=TRUE)
 source("https://bioconductor.org/biocLite.R")
 biocLite("ComplexHeatmap")
 install.packages("dendsort")
+install.packages("dendextendRcpp")
+install.packages("circlize")
 
 ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=TRUE,hc.order=NULL) {
 	library(ComplexHeatmap); library(circlize); library(dendsort); library(dendextend)
