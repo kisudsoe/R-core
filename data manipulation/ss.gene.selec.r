@@ -2,6 +2,7 @@
 ## Ver 1.0	- 150903, original version of this function
 ## ver 1.1	- 160429, using for Yeast HD LD Rho project
 ## ver 1.2  - 160922, bugfix, using for X-ALD project
+## ver 1.2a - 160930, minor edit
 
 ss.gene.selec = function(data.fc,fc=1.5,data.fdr,row.names) {
 	n = length(colnames(data.fc)) # Column 1 should have AffyID
@@ -28,9 +29,9 @@ ss.gene.selec = function(data.fc,fc=1.5,data.fdr,row.names) {
 	print(row.names)
 
 	result.summ = list(result=result,
-                     fdr1.id=fdr1.id,
-                     fdr5.id=fdr5.id,
-                     fdr10.id=fdr10.id)
+                     adj.p.1.id=fdr1.id,
+                     adj.p.5.id=fdr5.id,
+                     adj.p.10.id=fdr10.id)
 
 	return(result.summ)
 }
