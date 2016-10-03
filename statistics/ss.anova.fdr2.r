@@ -2,6 +2,7 @@
 ## ver 2.0	- 160503, Advanced process speed than 'ss.anova.fdr' function
 ## ver 2.1	- 160506, set rownames to result for Yeast HDLDRho project
 ## ver 2.1a - 160811, eliminate qvalue function (unavailable package)
+## ver 2.2  - 160927, using ggplot2
 
 ss.anova.fdr2 = function(data,group) {
 	library(pbapply) # package for progressbar, install needed
@@ -36,7 +37,7 @@ ss.anova.fdr2 = function(data,group) {
 	#library(qvalue)
 	#q2 = qvalue(raw.p)
 	#qvalue.fdr = q2$qvalues
-	cat('(3/9) qvalue.fdr\t-> skip, package is not available (for R version 3.3.1)\n')
+	cat('(3/9) qvalue.fdr\t-> skip, not available package (for R version 3.3.1)\n')
 
 	stat.BH.fdr = p.adjust(raw.p,"BH")
 	cat('(4/9) stat.fdr.BH\t-> done\n')
@@ -89,7 +90,17 @@ ss.anova.fdr2 = function(data,group) {
            cex=1,
            pch=16)
 
-	x11()
+	pvals = stack(result)
+	library(ggplot2)
+  p = ggplot(pvals,aes(ind,values))+theme_bw()+
+	  geom_point(aes(colour=ind),alpha=0.2,position="jitter")+
+    geom_boxplot(alpha=0,colour="black")+
+    labs(title="Distribution of adjusted p-values",
+         x="Algorithms", y="p-values")+
+    theme(axis.text.x=element_text(angle=45, hjust=1))
+	print(p)
+
+	#x11()
 	par(mfrow=c(2,2)) # 2x2 plot partition
 	hist(raw.p, xlim=c(0,1))
 	hist(stat.BH.fdr, xlim=c(0,1))
@@ -98,6 +109,7 @@ ss.anova.fdr2 = function(data,group) {
 
 	cat('\nPlot draw\t\t-> done\n')
 	cat('----------------------------------\n')
+
 	## plot draw done ##
 
 	#######################
