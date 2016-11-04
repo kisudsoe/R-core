@@ -1,8 +1,8 @@
 # 2016-05-01 SUN
 ## ver 1.0	- 160501, Yeast HD LD Rho project
-## ver 1.0a	- 160504, Bugfix: as.factor(group) at line 5
+## ver 1.0a	- 160504, Bugfix: as.factor(group)
 
-ss.fc = function(data,group) {
+ss.fc = function(dat,group) {
 	library(pbapply) # package for progressbar, install needed
 	group.lv = levels(as.factor(group)) # bugfix 160504
 	n = length(group.lv)
@@ -11,7 +11,7 @@ ss.fc = function(data,group) {
 
 	# Step 1. Calculate average of each group
 	for(i in 1:n) {
-		av = pbapply(data[,which(group==group.lv[i])],1,mean) # apply: 1-rows, 2-columns
+		av = pbapply(dat[,which(group==group.lv[i])],1,mean) # apply: 1-rows, 2-columns
 		avs = cbind(avs,av)
 	}
 	colnames(avs) = group.lv # set colnames of avs df
