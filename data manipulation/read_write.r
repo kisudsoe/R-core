@@ -23,3 +23,5 @@ read.delim('filename.txt', header=TRUE) # Read txt file delimited by tab.
 read.csv('filename.csv',header=TRUE) 	# Read csv file.
 
 write.table(fdr,"fdr.csv",sep=",",row.names=TRUE) # save into your workspace
+
+lapply(pca.AST,function(x) write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
