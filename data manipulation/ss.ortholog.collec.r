@@ -1,3 +1,4 @@
+# v1.1  - 161125
 # Get R packages for useMart
 source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
@@ -19,6 +20,10 @@ ortho_ensem = getLDS(attributes,filters="with_homolog_scer",
                      values=TRUE,mart=human, # values=TRUE : all exist values
                      attributesL=attributesL,martL=yeast)
 
+# Ensembl orthologs
+ortho_ensem_ensid_human = na.omit(unique(ortho_ensem$Ensembl.Gene.ID))
+ortho_ensem_ensid_yeast = na.omit(unique(ortho_ensem$Ensembl.Gene.ID.1))
+# Orthologs Entrez ID
 ortho_ensem_egid_human = na.omit(unique(ortho_ensem$EntrezGene.ID))
 ortho_ensem_egid_yeast = na.omit(unique(ortho_ensem$EntrezGene.ID.1))
 
@@ -66,9 +71,10 @@ ortho_inpara = dbGetQuery(hom.Hs.inp_dbconn(),
 #                            "SELECT * FROM Homo_sapiens;") # Same as data from human
 
 ## Ensembl search of 'Ortho_inpara' to get EntrezGene ID
-ens.getBM = function(query_ids,filter,marts,labels){
-  attributes = c('ensembl_peptide_id','ensembl_gene_id',
+ens.getBM = function(query_ids,attri=NULL,filter,marts,labels){
+  if(length(attri)==0) attributes = c('ensembl_peptide_id','ensembl_gene_id',
                  'external_gene_name','entrezgene')
+  else attributes = attri
   i = 1
   n = length(marts)
   out = data.frame()
@@ -81,10 +87,9 @@ ens.getBM = function(query_ids,filter,marts,labels){
     cat(paste(i,'=',labels[i],'>>',length(rst[,1]),'\n'))
     i = i+1
   }
-  
+
   return(out)
 }
-
 ortho_inpara_names = ens.getBM(query_ids=ortho_inpara$inp_id,
                                filter="ensembl_peptide_id",
                                marts=c(human,yeast),
@@ -133,7 +138,7 @@ ss.annot = function(origin,annot){ # First columns of both entries should be IDs
       time2 = Sys.time()
       cat('\n')
       print(time2-time1)
-    } 
+    }
     #######################
     i = i+1
   }
@@ -154,11 +159,11 @@ homo.filter = function(homo_db) {
   human_rows = which(homo_db$TaxId=="9606")
   yeast_rows = which(homo_db$TaxId=="4932")
   hu.ye_rows_union = union(human_rows,yeast_rows)
-  
+
   human_hid = homo_db$HID[human_rows]
   yeast_hid = homo_db$HID[yeast_rows]
   hu.ye_hid = intersect(human_hid,yeast_hid)
-  
+
   n = length(hu.ye_hid)
   out = data.frame()
   for(i in 1:n){
@@ -178,7 +183,7 @@ homo.filter = function(homo_db) {
       time2 = Sys.time()
       cat('\n')
       print(time2-time1)
-    } 
+    }
     #######################
   }
 
@@ -260,7 +265,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
       target = toupper(target) # Capital charater
       #target = paste0('^',toupper(target),'$')
     } else if(i==1){ print("target is numeric") }
-    
+
     ## Search ensembl DB
     if("ensembl" %in% dblist){
       if(is.numeric(target)){
@@ -290,7 +295,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
         } else { ensem_ye = NULL }
         ensem = rbind(ensem,ensem_hu,ensem_ye)
       } }
-    
+
     ## Search inparanoid DB with annotataion
     if("inparanoid" %in% dblist){
       if(is.numeric(target)){
@@ -317,7 +322,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
         names(inpara_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","cid")
         inpara = rbind(inpara,inpara_tmp)
       } }
-    
+
     ## Search homologene DB with annotation
     if("homologene" %in% dblist){
       if(is.numeric(target)){
@@ -344,7 +349,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
         names(homol_tmp) = c("Ensembl.Gene.ID","Gene.Symbol","EntrezGene.ID","Species","HID")
         homol = rbind(homol,homol_tmp)
       } }
-    
+
     #######################
     # Create progress bar #
     #######################
@@ -358,11 +363,11 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
       time2 = Sys.time()
       cat('\n')
       print(time2-time1)
-    } 
+    }
     #######################
     i = i+1
   }
-  
+
   if(Tbform==1) { # Compiling union table as 1:1 match
     ## bugfix_160718
     Tb = data.frame(Ensembl.Gene.ID=character(0),
@@ -379,7 +384,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
       homol = data.frame(Tb, HID=character(0)) }
     cola=6; colb=7
   } else if(Tbform==2) { cola=4; colb=5 } # Compiling union table as group result
-  
+
   unionlist = rbind(ensem[,1:cola],inpara[,1:cola],homol[,1:cola])
   unionlist = unique(unionlist)
   unionTb = data.frame(unionlist,
@@ -390,7 +395,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
   unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),colb]
   unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),colb]
   out = unionTb
-  
+
   return(out)
 }
 
