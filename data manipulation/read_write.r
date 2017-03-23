@@ -1,11 +1,17 @@
 ## 1. Data input ##
 # First written 2013
-# Last update 2016-04-29 FRI
-# Version info 2.0a
+# Last update 2017-03-10 FRI
+# Version info 2.1
 # Note : In case of "clipboard", you make sure :
 #    1) no space between words
 #    2) 'NA' for empty values.
 
+## R update to v3.3.1
+install.packages("installr")
+library(installr)
+updateR()
+
+## Input function
 input = function(i) {
 	if(i == 0) {
 		data = read.table("clipboard") # Data only. No colnames and rownames
@@ -19,9 +25,10 @@ input = function(i) {
 	return(data)
 }
 
+## Read file
 read.delim('filename.txt', header=TRUE) # Read txt file delimited by tab.
 read.csv('filename.csv',header=TRUE) 	# Read csv file.
 
+## Write file
 write.table(fdr,"fdr.csv",sep=",",row.names=TRUE) # save into your workspace
-
 lapply(pca.AST,function(x) write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
