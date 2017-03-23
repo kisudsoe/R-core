@@ -1,4 +1,74 @@
-﻿# v1.1  160720 - Color edit and label added
+# 2016-11-04 FRI for Yeast dynamic network
+ss.heatmap3 = function(mat,group.info,clstr=NULL,hc.order=NULL,yeast.cerev_somgrp=NULL) {
+  mat = as.matrix(yeast.cerev.sgl[-1])
+  if(length(clstr)>0) {
+    mat_id = which(yeast.cerev_somgrp[,3] %in% clstr)
+    mat.s = t(scale(t(mat)))[mat_id,]
+  } else mat.s = t(scale(t(mat)))
+
+  col.rg = c(-3,0,3)
+  colGroup = data.frame(#Group=group.info$groups[-1],
+                      #Group2=group.info$groups2[-1],
+                      Time=group.info$time[-1],
+                      #Glucose=group.info$glucose[-1],
+                      Treat=group.info$treat[-1])
+  colGroup2 = data.frame(Group2=group.info$groups2[-1])
+  ha = HeatmapAnnotation(df=colGroup)
+  ha2 = HeatmapAnnotation(df=colGroup2)
+
+  hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")
+  hc.dd = as.dendrogram(hc)
+  #order.dendrogram(hc.dd)
+  hc.dd = rotate(hc.dd,hc.order)
+  hr = hclust(as.dist(1-cor(t(mat),method="spearman")),method="complete")
+  hr.dd = as.dendrogram(hr)
+
+  ## filter somgrp
+  if(length(clstr)>0) yeast.cerev_somgrp = yeast.cerev_somgrp[mat_id,]
+
+  ## sort data.s by somgrp
+  mat.s = as.data.frame(mat.s)
+  mat.s_som = data.frame(cbind(mat.s,som=yeast.cerev_somgrp[,3]))
+  mat.s_som2 = mat.s_som[order(mat.s_som$som),]
+  mat.s = apply(mat.s_som2[,1:60],2,function(x) as.numeric(as.character(x)))
+
+  ## set rowAnnotation
+  l = NULL
+  rainb = list()
+  yeast.cerev_somgrp = yeast.cerev_somgrp[order(yeast.cerev_somgrp[,3]),]
+  for(i in 1:length(colnames(yeast.cerev_somgrp))) {
+    l1 = length(levels(factor(yeast.cerev_somgrp[,i])))
+    l = c(l,l1)
+    rainb[[i]] = rainbow(l1)
+    names(rainb[[i]]) = levels(factor(yeast.cerev_somgrp[,i]))
+  }
+  nms = colnames(yeast.cerev_somgrp)
+  rowA = rowAnnotation(df=yeast.cerev_somgrp,
+                       col=list(som9=rainb[[1]],
+                                som25=rainb[[2]],
+                                som100=rainb[[3]]))
+
+  cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
+  Heatmap(mat.s, col=cell.cols,
+			    name = "Probeset\nintensity\n(z-score)",
+			    cluster_rows=F,
+			    cluster_columns=hc.dd,
+			    top_annotation=ha,
+			    bottom_annotation =ha2,
+			    column_dend_height=unit(3,"cm"),
+			    column_dend_reorder=FALSE,
+			    row_dend_width=unit(3,"cm"),
+			    row_names_side="left",
+			    row_names_gp=gpar(fontsize=7))+rowA
+}
+ss.heatmap2(mat=yeast.cerev.sgl[1],group.info=group.info,
+           clstr=c("A01","A02","A03","A04","A05",
+                   "A06","A07","A08","A09","A10"),
+           hc.order=c(1:12,31:51,53:60,52,28:30,13:27),
+           yeast.cerev_somgrp=yeast.cerev_somgrp)
+
+
+# v1.1  160720 - Color edit and label added
 install.packages("heatmap.plus")
 ss.heatmap = function(data,hr=TRUE,row.col=NULL,hc=TRUE,hc.order=NULL) {
 	library("gplots"); library("devtools")
@@ -111,9 +181,11 @@ ss.heatmap2 = function(data,colrange=NULL,hr=TRUE,row.col=NULL,row.col2=NULL,hc=
 		hr = hclust(as.dist(1-cor(t(mat),method="pearson")),method="complete")
 		hr.dd = as.dendrogram(hr)
 	} else {hr.dd=FALSE}
-	print(order.dendrogram(hc.dd))
-	hc.dd = rotate(hc.dd,hc.order) #rotate dendrogram leafs
-	print(order.dendrogram(hc.dd))
+	if(length(hc.order)>0) {
+		print(order.dendrogram(hc.dd))
+		hc.dd = rotate(hc.dd,hc.order) #rotate dendrogram leafs
+		print(order.dendrogram(hc.dd))
+	}
 	cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
 
 	Heatmap(mat.s, col=cell.cols,
@@ -139,3 +211,42 @@ ss.heatmap2(data.arr.heat, hr=FALSE,hc=TRUE,
 			"Bl.1","Bl.2","Bl.3","Hw.2","Hw.3","Hw.1","Ya.1","Ya.2","Ya.3"))
 
 ss.heatmap2(data.arr.heat,colrange=c(-2,0,2), hr=FALSE,hc=TRUE)
+
+-----
+## ss.heatmap version 3
+## 161025 - For X-ALD project
+## 161101 - Adapted for Yeast dynamic network project
+suppressPackageStartupMessages(library(ComplexHeatmap))
+suppressPackageStartupMessages(library(circlize))
+suppressPackageStartupMessages(library(dendsort))
+suppressPackageStartupMessages(library(dendextend))
+
+sgl = read.csv("161025_cluster_heapmap_input.csv")
+sgl.n = sgl[,-1]
+
+mat = as.matrix(sgl.n)
+mat.s = t(scale(t(mat)))
+mat.s_max = max(mat.s); mat.s_min = min(mat.s)
+col.rg = c(mat.s_min,0,mat.s_max)
+
+colGroup = data.frame(Group=c(rep("AMN",4),rep("CCALD",4),rep("Normal",3)))
+ha = HeatmapAnnotation(df=colGroup)
+
+# hclust method="ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
+# cor method="pearson", "kendall", "spearman"
+# as.dist method="euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski"
+hc = hclust(as.dist(1-cor(mat, method="spearman")),method="complete")
+hc.dd = as.dendrogram(hc)
+hr = hclust(as.dist(1-cor(t(mat),method="spearman")),method="complete")
+hr.dd = as.dendrogram(hr)
+
+cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
+Heatmap(mat.s, col=cell.cols,
+			name = "Probeset\nintensity\n(Scaled)",
+			cluster_rows=hr.dd,cluster_columns=hc.dd,
+			top_annotation=ha,
+			column_dend_height=unit(3,"cm"),
+			column_dend_reorder=FALSE,
+			row_dend_width=unit(3,"cm"),
+			row_names_side = "left",
+			row_names_gp = gpar(fontsize=7))
