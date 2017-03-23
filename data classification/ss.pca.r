@@ -1,5 +1,6 @@
 # 2016-09-30 FRI
 ## PCA for total data
+library(FactoMineR)
 pca_total = PCA(t(yeast.cerev.sgl[,2:61])) # pca by arrays
 pca_total_coord = pca_total$ind$coord %>% as.data.frame
 pca_total_coord = cbind(pca_total_coord,
@@ -48,11 +49,6 @@ ggplot()+theme_bw()+ # plot for 669 degs
 
 
 # 2016-06-29 WED, 06-30 THU----
-## R update to v3.3.1
-install.packages("installr")
-library(installr)
-updateR()
-
 ## Multi factor analysis for dog characters
 ## Using FactoMineR library
 data = read.table("clipboard",header=T,row.names=1)
