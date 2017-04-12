@@ -6,7 +6,7 @@ output: html_document
 note: Codes in this document are imcomplete yet.
 ---
 
-```{r}
+```{r id:"j1emfhpc"}
 source("https://bioconductor.org/biocLite.R") # run only once
 biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
@@ -14,7 +14,7 @@ library(ggbio)
 library(dplyr)
 ```
 
-```{r}
+```{r id:"j1emfhpe"}
 data(genesymbol, package = "biovizBase")
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 model <- exonsBy(txdb, by = "tx")
@@ -35,7 +35,7 @@ exon.new2 = exon.new[,1:7]
 exon.df = tbl_df(exon.new)
 ```
 
-```{r}
+```{r id:"j1emfhpe"}
 p17 <- autoplot(txdb, genesymbol["RBM17"])
 plotRangesLinkedToData(exon.new, stat.y = c("sample1", "sample2"), annotation = list(p17))
 ```

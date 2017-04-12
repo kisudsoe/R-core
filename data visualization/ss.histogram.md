@@ -10,7 +10,7 @@ note: This document was made for Mice CR Liver Project.
 
 ## Input AffyEC_report
 
-```{r}
+```{r id:"j1eme0ld"}
 chp_EC = read.delim("AffyEC_Report_Probe signal.tsv")
 group = c("CD","CR85","CR55","CR70",
           "CD","CR55","CR70","CR85",
@@ -21,7 +21,7 @@ colnames(chp_EC) = c("AffyID",as.vector(group))
 
 ## Histogram
 
-```{r}
+```{r id:"j1enl4g2"}
 library(reshape)
 tmp1 = subset(chp_EC,AffyID%in%Affyid_anti)
 tmp2 = subset(chp_EC,AffyID%in%Affyid_intron)

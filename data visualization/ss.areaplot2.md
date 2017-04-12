@@ -6,7 +6,8 @@ output: html_document
 ---
 
 - 2016-09-26 ver for X-ALD project/splicing analysis
-```{r}
+
+```{r id:"j1emhtea"}
 ss.areaPlot2 = function(gen.sgl,id,grp) {
   n = length(gen.sgl)
   gen.sgl.trans = cbind(stack(gen.sgl),sample=rep(colnames(gen[4:14]),n),

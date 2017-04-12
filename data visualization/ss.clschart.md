@@ -5,11 +5,11 @@ date: "2017년 3월 9일"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, id:"j1emgpby"}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r package attachment}
+```{r package attachment, id:"j1emgpbz"}
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(reshape))
 ```
@@ -18,13 +18,13 @@ suppressPackageStartupMessages(library(reshape))
 
 ## 1. Load data
 
-```{r}
+```{r id:"j1emgpc0"}
 cls = read.csv("170111_yeast cls.csv")
 ```
 
 ## 2. Plot strains
 
-```{r}
+```{r id:"j1emgpc3"}
 clsplot = function(strn) {
   date_n=subset(str_date,cls.strain%in%strn)$cls.date
   x = c(0,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,19,20,21,23,26)
