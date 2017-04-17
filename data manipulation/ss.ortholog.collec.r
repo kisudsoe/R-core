@@ -1,4 +1,8 @@
-# v1.1  - 161125
+## Code logs ##
+# v1.1  - 161125, Yeast network project
+# v1.2  - 170417, Mice CR liver project
+###############
+
 # Get R packages for useMart
 source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
@@ -21,11 +25,11 @@ ortho_ensem = getLDS(attributes,filters="with_homolog_scer",
                      attributesL=attributesL,martL=yeast)
 
 # Ensembl orthologs
-ortho_ensem_ensid_human = na.omit(unique(ortho_ensem$Ensembl.Gene.ID))
-ortho_ensem_ensid_yeast = na.omit(unique(ortho_ensem$Ensembl.Gene.ID.1))
+ortho_ensem_ensid_human = na.omit(unique(ortho_ensem$Gene.stable.ID)) # bugfix 170417
+ortho_ensem_ensid_yeast = na.omit(unique(ortho_ensem$Gene.stable.ID.1))
 # Orthologs Entrez ID
-ortho_ensem_egid_human = na.omit(unique(ortho_ensem$EntrezGene.ID))
-ortho_ensem_egid_yeast = na.omit(unique(ortho_ensem$EntrezGene.ID.1))
+ortho_ensem_egid_human = na.omit(unique(ortho_ensem$NCBI.gene.ID)) # bugfix 170417
+ortho_ensem_egid_yeast = na.omit(unique(ortho_ensem$NCBI.gene.ID.1))
 
 # > head(ortho_ensem)
 #   Ensembl.Gene.ID HGNC.symbol EntrezGene.ID Ensembl.Gene.ID.1 Associated.Gene.Name EntrezGene.ID.1
