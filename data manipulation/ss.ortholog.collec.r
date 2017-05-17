@@ -273,7 +273,7 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
     ## Search ensembl DB
     if("ensembl" %in% dblist){
       if(is.numeric(target)){
-        ensem_etz = data.frame(ortho_ensem$EntrezGene.ID,ortho_ensem$EntrezGene.ID.1)
+        ensem_etz = data.frame(ortho_ensem$NCBI.gene.ID,ortho_ensem$NCBI.gene.ID.1) # bugfix 170417
         ensem_rows = which(apply(ensem_etz,1,function(x) any(which(x==target))))
       } else {
         ensem_rows = which(apply(ortho_ensem,1,function(x) any(which(x==target))))
@@ -386,19 +386,25 @@ ortho.genes = function(targets,dblist=c("ensembl","inparanoid","homologene"),
       inpara = data.frame(Tb, cid=character(0)) }
     if(length(homol)==0) {
       homol = data.frame(Tb, HID=character(0)) }
-    cola=6; colb=7
-  } else if(Tbform==2) { cola=4; colb=5 } # Compiling union table as group result
+      cola=7 # ortholog group id
+    } else if(Tbform==2) { cola=5 } # Compiling union table as group result
+    #print(paste("ensem, length=",length(rownames(ensem))))
+    #print(ensem)
+    #print(paste("inpara, length=",length(rownames(inpara))))
+    #print(inpara)
+    #print(paste("homol, length=",length(rownames(homol))))
+    #print(homol)
 
-  unionlist = rbind(ensem[,1:cola],inpara[,1:cola],homol[,1:cola])
-  unionlist = unique(unionlist)
-  unionTb = data.frame(unionlist,
-                       Ensembl=character(length(unionlist[,1])),
-                       Inparanoid=character(length(unionlist[,1])),
-                       Homologene=character(length(unionlist[,1])))
-  unionTb$Ensembl    = ensem[match(unionTb[,1],ensem[,1]),colb]
-  unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),colb]
-  unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),colb]
-  out = unionTb
+    unionlist = rbind(ensem[,-cola],inpara[,-cola],homol[,-cola]) # change 170417
+    unionlist = unique(unionlist)
+    unionTb = data.frame(unionlist,
+                         Ensembl=character(length(unionlist[,1])),
+                         Inparanoid=character(length(unionlist[,1])),
+                         Homologene=character(length(unionlist[,1])))
+    unionTb$Ensembl    = ensem[match(unionTb[,1],ensem[,1]),cola]
+    unionTb$Inparanoid = inpara[match(unionTb[,1],inpara[,1]),cola]
+    unionTb$Homologene = homol[match(unionTb[,1],homol[,1]),cola]
+    out = unionTb
 
   return(out)
 }
