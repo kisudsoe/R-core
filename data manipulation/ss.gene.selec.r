@@ -3,40 +3,68 @@
 ## ver 1.1	- 160429, using for Yeast HD LD Rho project
 ## ver 1.2  - 160922, bugfix, using for X-ALD project
 ## ver 1.2a - 160930, minor edit
+## ver 1.3  - 170531, add uniononly toggle and ttest for Yeast HD/LD/Rho project
 
-ss.gene.selec = function(data.fc,fc=1.5,data.fdr,row.names) {
-	n = length(colnames(data.fc)) # Column 1 should have AffyID
-	result = NULL; fdr1.id = NULL; fdr5.id = NULL; fdr10.id = NULL;
-	for(i in 2:n) {
-		fdr1 = which(data.fdr<=0.01 & abs(data.fc[,i])>fc)
-		f1 = length(fdr1)
-		fdr5 = which(data.fdr<=0.05 & abs(data.fc[,i])>fc)
-		f5 = length(fdr5)
-		fdr10 = which(data.fdr<=0.1 & abs(data.fc[,i])>fc)
-		f10 = length(fdr10)
-		num1 = c(f1,f5,f10)
+ss.gene.selec = function(data.fc,fc=c(2,3), data.pval, uniononly=F,test=NULL) {
+  n= length(fc)
+  m= length(colnames(data.fc))
 
-		result = cbind(result,num1)
-		fdr1.id = union(fdr1.id,fdr1)
-		fdr5.id = union(fdr5.id,fdr5)
-		fdr10.id = union(fdr10.id,fdr10)
-	}
+  result=NULL; uninum=NULL
+  for(i in 1:n) {
+    fc.result=NULL;fdr1.id=NULL; fdr5.id=NULL; fdr10.id=NULL
+    for(j in 1:m) {
+      if(test=="anova") {
+        fdr1 = which(data.pval<=0.01 & abs(data.fc[,j])>fc[i])
+        fdr5 = which(data.pval<=0.05 & abs(data.fc[,j])>fc[i])
+        fdr10 = which(data.pval<=0.1 & abs(data.fc[,j])>fc[i])
+      } else if (test=="ttest") {
+        fdr1 = which(data.pval[,j]<=0.01 & abs(data.fc[,j])>fc[i])
+        fdr5 = which(data.pval[,j]<=0.05 & abs(data.fc[,j])>fc[i])
+        fdr10 = which(data.pval[,j]<=0.1 & abs(data.fc[,j])>fc[i])
+      } else { stop("please input --> test='anova' or 'ttest'"); }
+      f1 = length(fdr1)
+      f5 = length(fdr5)
+      f10 = length(fdr10)
+      col = c(f1,f5,f10)
 
-	num2 = c(length(fdr1.id),length(fdr5.id),length(fdr10.id))
-	result = cbind(result,num2)
-	colnames(result) = c(colnames(data.fc)[2:n],"Union")
-	rownames(result) = row.names
-	print(row.names)
+      fc.result = cbind(fc.result,col)
+      fdr1.id = union(fdr1.id,fdr1)
+      fdr5.id = union(fdr5.id,fdr5)
+      fdr10.id = union(fdr10.id,fdr10)
+    }
+    uni = c(length(fdr1.id),length(fdr5.id),length(fdr10.id))
 
-	result.summ = list(result=result,
-                     adj.p.1.id=fdr1.id,
-                     adj.p.5.id=fdr5.id,
-                     adj.p.10.id=fdr10.id)
+    if(uniononly==F) {
+      result = rbind(result,fc.result)
+      uninum = c(uninum,uni)
+    } else if(uniononly==T) {
+      result = cbind(result,uni)
+    }
+  }
 
-	return(result.summ)
+  if(uniononly==F) {
+    result = cbind(result,uninum)
+    colnames(result) = c(colnames(data.fc),"Union")
+
+    thrsh_fc = c(paste0("fc",fc))
+    thrsh_pval = c(paste0(names(data.pval)[1],c('_1','_5','10')))
+    thrsh = as.vector(outer(thrsh_pval,thrsh_fc,paste,sep="."))
+    print("Significance thresholds are fixed at 1%, 5%, 10%.")
+    rownames(result) = thrsh
+  } else if(uniononly==T) {
+    colnames(result) = c(paste0('FC',fc))
+    rownames(result) = paste0(names(data.pval)[1],c('_1','_5','10'))
+    print("Significance thresholds are fixed at 1%, 5%, 10%.")
+  }
+
+  write.csv(result,"ss.gene.selec_result.csv")
+  return(result)
 }
 
-fcfdr2 = c("fc2&fdr1","fc2&fdr5","fc2&fdr10")
-gene.num2 = ss.gene.selec(fc.cerev[,1:3],fc=2,
-                          pval_cerev$stat.Bonferroni,fcfdr2)
-View(gene.num2$result)
+fc = data.frame(rma_df$LD.HD,rma_df$Rho0.HD,rma_df$Rho0.LD)
+bonf = rma_df$stat.Bonferroni
+names(bonf) = "Bonf"
+fc_thrsh = c(1.5,2,3,5,10)
+
+ss.gene.selec(data.fc=fc,fc=fc_thrsh, data.pval=bonf, uniononly=T,test='ttest')
+# test='anova' or 'ttest'
