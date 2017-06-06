@@ -28,6 +28,8 @@ ss.tukey3Venn = function(tukey) { # 160504 row[2] is centered.
 	# Make Venn Diagram
 	library(limma)
 	vennDiagram(out) # Generate Venn Diagram
+	dev.copy(png,"ss.tukey3Venn_fig.png",width=8,height=7,units="in",res=100)
+  dev.off()
 
 	# Make return table
 	out = data.frame(tukey,out)
@@ -47,6 +49,7 @@ biocLite("limma")
 ## Coded for general
 ## v1.0 2015 - original version
 ## v1.1 160704 - Add names of venn from vector
+## v1.2 170606 - Bug fix for Atom
 ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for each 3-groups
 
 	# Generate union group from input three groups
@@ -55,6 +58,7 @@ ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for eac
 
 	# Get names from input vectors
 	title = c(names(group1)[1], names(group2)[1], names(group3)[1])
+  print(title)
 
 	# Togethering the vectors to one dataFrame list
 	unionPr = data.frame(list=unionlist,
@@ -67,7 +71,7 @@ ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for eac
 	unionPr$g3 = group3[match(unionPr$list,group3)]
 
 	rownames(unionPr) = unionPr[,1] 	# column 1 list as rownames
-	print(head(rownames(unionPr)))
+	#print(head(rownames(unionPr)))
 	unionPr[1] = NULL 					# delete column 1
 
 	# Make TRUE/FALSE table to match with ID list
@@ -76,46 +80,15 @@ ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for eac
 
 	union = as.data.frame(union) 		# Make 'union' to data.frame form
 	title = c(paste(title[1],'\n',length(group1)),
-			  paste(title[2],'\n',length(group2)),
-			  paste(title[3],'\n',length(group3)))
+			      paste(title[2],'\n',length(group2)),
+			      paste(title[3],'\n',length(group3)))
 	colnames(union) = title 			# Names attach to venn diagram
 
 	library(limma)
 	union = list(list=union, vennCounts=vennCounts(union))
 	vennDiagram(union$list,main=main) 			# Generate Venn Diagram
-
-	return(union)
-}
-
-id_Ensembl = unlist(read.table("clipboard"))
-id_InPara = unlist(read.table("clipboard"))
-id_Homolo = unlist(read.table("clipboard"))
-
-id_Ensembl = setNames(id_Ensembl,"Ensembl") # Set vector Name
-id_InPara = setNames(id_InPara,"InParanoid8")
-id_Homolo = setNames(id_Homolo,"HomoloGene")
-
-union_id = ss.venn3(id_Ensembl,id_InPara,id_Homolo, main="Yeast orthologs from DBs")
-
-# 2016-05-09 MON
-## ver 1.0 - 160509, Coded for general
-ss.venn2 = function(group1,group2) { #Venn for 2-groups
-	unionlist = union(group1,group2)
-	unionPr = data.frame(list=unionlist,
-                         g1=character(length(unionlist)),
-                         g2=character(length(unionlist)))
-	unionPr$g1 = group1[match(unionPr$list,group1)]
-	unionPr$g2 = group2[match(unionPr$list,group2)]
-	rownames(unionPr) = unionPr[,1]
-	unionPr[1] = NULL
-	union = (unionPr != "") # TRUE, if id exist.
-	union[is.na(union)] = FALSE # FALSE, if id null.
-	print(head(union))
-
-	library(limma)
-	colnames(union) = c(length(group1),length(group2))
-	union = list(list=union, vennCounts=vennCounts(union))
-	vennDiagram(union$list)
+  dev.copy(png,"ss.venn3_fig.png",width=8,height=7,units="in",res=100)
+  dev.off()
 
 	return(union)
 }
