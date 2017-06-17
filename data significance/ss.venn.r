@@ -53,8 +53,9 @@ biocLite("limma")
 ss.venn3 = function(group1, group2, group3, main="") { # 160704 ver - id for each 3-groups
 
 	# Generate union group from input three groups
-	unionlist = union(group1,group2)
-	unionlist = union(unionlist,group3)
+	unionlist = Reduce(union, list(group1, group2, group3))
+	#unionlist = union(group1,group2)
+	#unionlist = union(unionlist,group3)
 
 	# Get names from input vectors
 	title = c(names(group1)[1], names(group2)[1], names(group3)[1])
