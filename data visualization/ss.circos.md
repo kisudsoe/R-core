@@ -1,8 +1,8 @@
 ---
 title:  "ss.circos.md"
-author: "Kim SS"
+by:     "Kim SS"
 date:   "2017-06-27 TUE"
-description: "This file is written for 2017 Spring Aging Consorcium oral presentation"
+note:   "This file was first written for 2017 Spring Aging Consorcium oral presentation"
 ---
 
 * Install the package from Bioconductor
