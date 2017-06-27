@@ -1,5 +1,53 @@
+# 2017-06-09 FRI for Yeast HD/LD/Rho project
+ss.heatmap4 = function(mat,title="", hr.order=NULL, split=NULL, img_name=NULL) {
+  #source("https://bioconductor.org/biocLite.R")
+  #biocLite("ComplexHeatmap")
+  library(ComplexHeatmap)
+  mat = mat
+  mat.s = t(scale(t(mat)))
+
+  #n = levels(factor(dat$tukey))
+  #colr = sample(rainbow(256),size=length(n))
+  #colr.grp = colr[as.numeric(deg_1738$tukey)]
+
+  #install.packages('circlize',repos="http://cran.us.r-project.org")
+  library(circlize)
+  mat.s_max = max(mat.s); mat.s_min = min(mat.s)
+  col.rg = c(mat.s_min,0,mat.s_max)
+  #col.rg = c(-1.5,0,1.5)
+  cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
+
+  hc = hclust(as.dist(1-cor(mat,method="pearson")),method="complete")
+  hc.dd = as.dendrogram(hc)
+  if(!is.null(hr.order)) hc.dd = reorder(hc.dd,hr.order,mean)
+
+  hm = Heatmap(matrix=mat.s,
+               column_title=title,
+               name="Probeset\nintensity\n(Scaled)",
+               col=cell.cols,
+               cluster_columns=hc.dd,
+               column_dend_reorder=F,
+               column_dend_height=unit(2,"cm"),
+               row_dend_width=unit(2,"cm"),
+               show_row_names=F,
+               split=split,
+               row_title_gp=gpar(cex=0.8))
+  print(hm)
+  if(!is.null(img_name)) {
+    dev.copy(png,img_name,width=7,height=8,units="in",res=100)
+    dev.off()
+    cat("Draw heatmap done.\n")
+  }
+}
+ss.heatmap4(deg_1738[,2:16],
+            title="Heatmap of DEG 1,738 by Tukey",
+            hr.order=c(1:5,6:10,11:15),
+            split=tukey,
+            img_name="170609_heatmap_deg1738_tukey.png")
+
 # 2016-11-04 FRI for Yeast dynamic network
 ss.heatmap3 = function(mat,group.info,clstr=NULL,hc.order=NULL,yeast.cerev_somgrp=NULL) {
+  library(ComplexHeatmap); library(circlize)
   mat = as.matrix(yeast.cerev.sgl[-1])
   if(length(clstr)>0) {
     mat_id = which(yeast.cerev_somgrp[,3] %in% clstr)
