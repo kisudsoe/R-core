@@ -11,20 +11,6 @@ install.packages("installr")
 library(installr)
 updateR()
 
-## Input function
-input = function(i) {
-	if(i == 0) {
-		data = read.table("clipboard") # Data only. No colnames and rownames
-	} else if(i == 1) {
-		data = read.table("clipboard", header=T) # Set colnames
-	} else if(i == 2) {
-		data = read.table("clipboard", row.names=1) # No colnames. Set rownames
-	} else if(i == 3) {
-		data = read.table("clipboard", header=T, row.names=1) # Set colnames and rownames
-	}
-	return(data)
-}
-
 ## Read file
 read.delim('filename.txt', header=TRUE) # Read txt file delimited by tab.
 read.csv('filename.csv',header=TRUE) 	# Read csv file.
@@ -32,3 +18,10 @@ read.csv('filename.csv',header=TRUE) 	# Read csv file.
 ## Write file
 write.table(fdr,"fdr.csv",sep=",",row.names=TRUE) # save into your workspace
 lapply(pca.AST,function(x) write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
+
+## winProgressBar
+time1=Sys.time()
+pb=winProgressBar(title="Progress",label="description",min=0,max=3000,width=500)
+for(i in 1:300) {
+	setWinProgressBar(pb,i,title=paste(round(i/3000*100,1),"% done for",round(Sys.time()-time1,1),"sec"))
+}
