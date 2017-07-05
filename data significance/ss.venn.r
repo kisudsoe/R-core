@@ -1,4 +1,43 @@
-﻿# 2016-05-04 WED
+# 2017-07-04 TUE
+## ver1.0 - 170704, Generate for Dog project
+ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
+  # grouplist = list(group1,group2,group3)
+  library(limma)
+	# Generate union group from input three groups
+  unionlist = Reduce(union, grouplist)
+
+	# Get names from input vectors
+	g.title = names(grouplist)
+
+	# Togethering the vectors to one dataFrame list
+  unionPr=NULL; title=NULL
+  for(i in 1:length(grouplist)) {
+    unionPr = cbind(unionPr,grouplist[[i]][match(unionlist,grouplist[[i]])])
+    title = c(title,paste(g.title[i],'\n',length(grouplist[[i]])))
+  }
+  rownames(unionPr) = unionlist
+
+	# Make TRUE/FALSE table to match with ID list
+	union = (unionPr != "") 			# Transform values to TRUE, if ID exits
+	union[is.na(union)] = FALSE			# Transform NA to FALSE value
+	union = as.data.frame(union) 		# Make 'union' to data.frame form
+	colnames(union) = title 			# Names attach to venn diagram
+	out = list(list=union, vennCounts=vennCounts(union))
+
+  ## Generate Venn Diagram
+	v = vennDiagram(union$list,main=paste0(main," (",nrow(union)," genes)"))
+  print(v)
+  dev.copy(png,"ss.venn3.png",width=8,height=8,units="in",res=100)
+  graphics.off()
+	return(out)
+}
+
+ortho_egid_canis = list(ortho_ensem_egid_canis,ortho_inpara_egid_canis,ortho_homo_egid_canis)
+names(ortho_egid_canis) = c("Ensembl_dog","Inparanoid_dog","HomoloGene_dog")
+ortho_union_egid_canis = ss.venn3(ortho_egid_canis, main="Dog-Yeast orthologs (Dog) from DBs")
+
+
+# 2016-05-04 WED
 ## ver 1.0	- 160504, First version using for Human X-ALD project, Yeast project
 ## Ver 1.0a - 160505, Add function for print process information out
 ss.tukey3Venn = function(tukey) { # 160504 row[2] is centered.
