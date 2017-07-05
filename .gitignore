@@ -1,3 +1,9 @@
+# Temporary saved files
+ortho_ensem.csv
+ortho_homo.csv
+ortho_inpara_ann.csv
+ortho_inpara_names.csv
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
