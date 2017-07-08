@@ -4,7 +4,6 @@
 
 10090	Mus musculus
 
-
 10116	Rattus norvegicus
 
 28985	Kluyveromyces lactis
