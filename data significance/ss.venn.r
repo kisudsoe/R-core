@@ -25,16 +25,21 @@ ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
 	out = list(list=union, vennCounts=vennCounts(union))
 
   ## Generate Venn Diagram
-	v = vennDiagram(union$list,main=paste0(main," (",nrow(union)," genes)"))
+	v = vennDiagram(union,main=paste0(main," (",nrow(union)," genes)"))
   print(v)
-  dev.copy(png,"ss.venn3.png",width=8,height=8,units="in",res=100)
+  dev.copy(png,"ss.venn.png",width=8,height=8,units="in",res=100)
   graphics.off()
 	return(out)
 }
 
 ortho_egid_canis = list(ortho_ensem_egid_canis,ortho_inpara_egid_canis,ortho_homo_egid_canis)
 names(ortho_egid_canis) = c("Ensembl_dog","Inparanoid_dog","HomoloGene_dog")
-ortho_union_egid_canis = ss.venn3(ortho_egid_canis, main="Dog-Yeast orthologs (Dog) from DBs")
+ortho_union_egid_canis = ss.venn(ortho_egid_canis, main="Dog-Yeast orthologs (Dog) from DBs")
+#--------------------
+affyid1 = unlist(read.delim("clipboard")); print(length(affyid1)) # Protein_catabolism
+affyid2 = unlist(read.delim("clipboard")); print(length(affyid2)) # Mitochondrion
+affyids = list(affyid1,affyid2); names(affyids) = c("Protein_catabolism","Mitochondrion")
+out = ss.venn(affyids,main="Genes: Protein catabolism - Mitochondrion")
 
 
 # 2016-05-04 WED
