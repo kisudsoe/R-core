@@ -9,7 +9,7 @@ ss.tukey2 = function(data,groups) {
 
 	cat('\nProcess iteration =',n,'\n')
 	time1 = Sys.time()
-	
+
 	# Tukey's post hoc test
 	out = pbapply(data,1,function(row){
 		values = as.numeric(row)
@@ -17,22 +17,21 @@ ss.tukey2 = function(data,groups) {
 		posthoc = TukeyHSD(x=a1, conf.level=0.95) # 95% confidence interval
 		#plot(posthoc) # generate graph
 		#text(0,10.7,cex=1.2,labels=row[i],xpd=TRUE) # Set ID on the graph
-					
+
 		ex.pval = extract_p(posthoc$groups)
 		sigroup = multcompLetters(ex.pval) # using multcompView package
 		output = t(data.frame(sigroup$Letters))
 		return(output)
 		}) # apply statement end
 	out = as.data.frame(t(out))
-	
+
 	## Get column names ##
 	values = as.numeric(data[1,])
 	ex.pval = extract_p(TukeyHSD(x=aov(values~groups),conf.level=0.95)$groups)
 	colnames(out) = rownames(data.frame(multcompLetters(ex.pval)$Letters))
 	######################
 	
-	time2 = Sys.time()
-	print(time2-time1)
+	print(Sys.time()-time1)
 	return(out)
 }
 
@@ -49,23 +48,23 @@ ss.tukey = function(data,groups) { # function 'ss.tukey' start
 	n = length(row)
 	groups = as.vector(groups)
 	out = NULL
-  
+
 	for(i in 1:n) { # 'for' statement start
 		values = as.numeric(t(data)[,i])
-    
+
 		# post hoc tests - tukey #
 		a1 = aov(values~groups)
 		posthoc = TukeyHSD(x=a1, conf.level=0.95) # 95% confidence interval
 		#plot(posthoc) # generate graph
 		#text(0,10.7,cex=1.2,labels=row[i],xpd=TRUE) # ID on the graph
-    
+
 		# using multcompView package #
 		ex.pval = extract_p(posthoc$groups)
 		sigroup = multcompLetters(ex.pval)
-    
+
 		# stack iterative results
 		out = rbind(out,t(data.frame(sigroup$Letters)))
-    
+
 		#######################
 		# Create progress bar #
 		#######################
@@ -79,7 +78,7 @@ ss.tukey = function(data,groups) { # function 'ss.tukey' start
 			time2 = Sys.time()
 			cat('\nProcess done.\n')
 			print(time2-time1)
-		} 
+		}
 		#######################
 	} # 'for' statement end
 	colnames(out) = rownames(data.frame(sigroup$Letters))

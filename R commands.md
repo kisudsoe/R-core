@@ -297,24 +297,24 @@ gsub("before", "after", x) # 벡터 x에서 "before"를 "after"로 치환함
 ```r
 par(...) # 그래픽 출력 변수 설정. ()안에 아래의 명령어를 쓴다.
 ```
-* adj # 글자 정렬
-* bg # 배경색
-* bty # 외곽선 형태 지정
-* cex # 심볼, 글씨 크기 cex.axis, cex.lab, cex.main, cex.sub
-* col # 색지정 col.axis, col.lab, col.main, col.sub
-* font # 글씨체
-* las # 글씨 방향
-* lty # 선형태
-* lwd # 선굵기
-* mar # 그래프 여백 지정
-* mfcol # 출력 배열 형식 c(nr, nc)
-* mfrow # 출력 배열 형식 (행우선)
-* pch # 심볼 형태 지정
-* ps # 글씨 크기(point)
-* pty # 출력 영역 "s": 사각, "m": 최대
-* tck, tcl # 축 마크
-* xaxs, yaxs # 축 형태
-* xaxt, yaxt # 축 표시
+* `adj` # 글자 정렬
+* `bg` # 배경색
+* `bty` # 외곽선 형태 지정
+* `cex` # 심볼, 글씨 크기 `cex.axis`, `cex.lab`, `cex.main`, `cex.sub`
+* `col` # 색지정 `col.axis`, `col.lab`, `col.main`, `col.sub`
+* `font` # 글씨체
+* `las` # 글씨 방향
+* `lty` # 선형태
+* `lwd` # 선굵기
+* `mar` # 그래프 여백 지정
+* `mfcol` # 출력 배열 형식 c(nr, nc)
+* `mfrow` # 출력 배열 형식 (행우선)
+* `pch` # 심볼 형태 지정
+* `ps` # 글씨 크기(point)
+* `pty` # 출력 영역 "s": 사각, "m": 최대
+* `tck`, `tcl` # 축 마크
+* `xaxs`, `yaxs` # 축 형태
+* `xaxt`, `yaxt` # 축 표시
 
 ## IV-2. Hihg-level 관련
 

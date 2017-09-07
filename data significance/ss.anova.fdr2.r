@@ -3,6 +3,7 @@
 ## ver 2.1	- 160506, set rownames to result for Yeast HDLDRho project
 ## ver 2.1a - 160811, eliminate qvalue function (unavailable package)
 ## ver 2.2  - 160927, using ggplot2
+## ver 2.3  - 170907, image save as png for Yeast HD/LD/Rho project
 
 ss.anova.fdr2 = function(data,group) {
 	library(pbapply) # package for progressbar, install needed
@@ -89,6 +90,8 @@ ss.anova.fdr2 = function(data,group) {
 		   col=c("black",rainbow(9)), # Set color
            cex=1,
            pch=16)
+  dev.copy(png,filename="ss.anova.fdr2_matplot.png",width=7,height=7,units="in",res=100)
+  dev.off()
 
 	pvals = stack(result)
 	library(ggplot2)
@@ -98,7 +101,8 @@ ss.anova.fdr2 = function(data,group) {
     labs(title="Distribution of adjusted p-values",
          x="Algorithms", y="p-values")+
     theme(axis.text.x=element_text(angle=45, hjust=1))
-	print(p)
+  ggsave(filename="ss.anova.fdr2_pvaldist.png",plot=p,width=7,height=7,units="in")
+  #print(p)
 
 	#x11()
 	par(mfrow=c(2,2)) # 2x2 plot partition
@@ -122,4 +126,4 @@ ss.anova.fdr2 = function(data,group) {
 	return(result)
 }
 
-pval_gene = ss.anova.fdr2(data_gene_mainNum,group)
+pval_gene = ss.anova.fdr2(gene_sgnl,group)
