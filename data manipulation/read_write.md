@@ -1,11 +1,12 @@
 ---
 Title: read_write.md
 Date: 2017-07-15 SAT
-Version: v3.0
+Version: v3.1
 Note : First written of this file was at 2013
 ---
 
 * v3.0  - 2017-07-15 SAT, Update install pakcages
+* v3.1  - 2017-10-14 SAT, Update keyboard input
 
 ## 1. Data input
 
@@ -40,22 +41,25 @@ library(RDocumentation)
 install_package("pbapply", 1) # type 1: CRAN; type 2: BioConductor; type 3: GitHub; type 4: default part of R
 ```
 
-### Read file
+### Read from keyboard input
+```r
+a=readLines(con=file("stdin"))
+```
 
+### Read file
 ```r
 read.delim('filename.txt', header=TRUE) # Read txt file delimited by tab.
 read.csv('filename.csv',header=TRUE) 	# Read csv file.
 ```
 
 ### Write file
-
 ```r
 write.table(fdr,"fdr.csv",sep=",",row.names=TRUE) # save into your workspace
-lapply(pca.AST,function(x) write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
+lapply(pca.AST,function(x)
+       write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
 ```
 
 ### winProgressBar
-
 * Updated at 2017
 
 ```r {.lineNo}
