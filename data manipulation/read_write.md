@@ -35,7 +35,7 @@ install.packages('multicompView', repos="http://cran.us.r-project.org")
 # Bioconductor
 source("https://bioconductor.org/biocLite.R"); biocLite("limma")
 
-# Using RDocumentation packages
+# Using RDocumentation packages <- 안된다?
 install.packages('RDocumentation', repos="http://cran.us.r-project.org")
 library(RDocumentation)
 install_package("pbapply", 1) # type 1: CRAN; type 2: BioConductor; type 3: GitHub; type 4: default part of R
