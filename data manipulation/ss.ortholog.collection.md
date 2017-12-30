@@ -152,13 +152,9 @@ ss.venn = function(grouplist, main="") {
 ```r {.lineNo}
 library(biomaRt)
 human_ds = "hsapiens_gene_ensembl"; human_fl = "with_homolog_scer"
-attributes = c('ensembl_gene_id','hgnc_symbol','entrezgene')
-
 mouse_ds = "mmusculus_gene_ensembl"; mouse_fl = "with_scerevisiae_homolog"
 canis_ds = "cfamiliaris_gene_ensembl"; canis_fl = "with_scerevisiae_homolog"
 yeast_ds = "scerevisiae_gene_ensembl"
-attributes = c('ensembl_gene_id','external_gene_name','entrezgene')
-attributesL = c('ensembl_gene_id','external_gene_name','entrezgene')
 
 ensem1 = useMart("ensembl", dataset=yeast_ds)
 ensem2 = useMart("ensembl", dataset=canis_ds) # 170704
@@ -170,6 +166,9 @@ print(listAttributes(ensem2)$name) # To find attribute list
 listFilters(ensem2)                # To find filter list
 ##-----------------------------##
 
+#attributes = c('ensembl_gene_id','hgnc_symbol','entrezgene')
+attributes = c('ensembl_gene_id','external_gene_name','entrezgene')
+attributesL = c('ensembl_gene_id','external_gene_name','entrezgene')
 ortho_ensem = getLDS(attributes,filters=canis_fl,
                      values=TRUE,mart=ensem2, # values=TRUE : all exist values
                      attributesL=attributesL,martL=ensem1)
