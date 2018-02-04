@@ -19,14 +19,14 @@ ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
   	rownames(unionPr) = unionlist
 
 	# Make TRUE/FALSE table to match with ID list
-	union = (unionPr != "") 			# Transform values to TRUE, if ID exits
+	union = (unionPr != "") 			# Transform values to TRUE, if ID exists
 	union[is.na(union)] = FALSE			# Transform NA to FALSE value
 	union = as.data.frame(union) 		# Make 'union' to data.frame form
 	colnames(union) = title 			# Names attach to venn diagram
 	out = list(list=union, vennCounts=vennCounts(union))
 
   	## Generate Venn Diagram
-	v = vennDiagram(union,main=paste0(main," (",nrow(union)," genes)"))
+	v = vennDiagram(union,main=paste0(main," (",nrow(union)," genes)"),circle.col=rainbow(length(g.title)))
   	print(v)
   	dev.copy(png,"ss.venn.png",width=8,height=8,units="in",res=100)
   	graphics.off()
