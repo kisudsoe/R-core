@@ -1,4 +1,4 @@
-Last updated in Feb. 14, 2008
+# Last updated in Feb. 14, 2008
 
 Please note that the depcrecated FTP file formats (hmlg.ftp and hmlg.trip.ftp) 
 will be discontinued as of Jan. 1, 2007.
@@ -13,17 +13,20 @@ build_inputs/all_proteins.data
 build_inputs/proteins_for_clustering.data
 build_inputs/taxid_taxname
 
-----------------------------------------------------------
+
+
+# About
+
 homologene.data is a tab delimited file containing the following
 columns:
 
-1) HID (HomoloGene group id)
-2) Taxonomy ID
-3) Gene ID
-4) Gene Symbol
-5) Protein gi
-6) Protein accession
------------------------------------------------------------
+1. HID (HomoloGene group id)
+2. Taxonomy ID
+3. Gene ID
+4. Gene Symbol
+5. Protein gi
+6. Protein accession
+
 homologene.xml.gz is a gzip'ed file containing a XML dump of the
 HomoloGene build.  It contains much more information than
 homologene.data (such as gene and protein links, distance analysis results,
@@ -45,16 +48,18 @@ be reciprocal best.  Thus hits in hmlg.ftp can be one of the following:
 b - reciprocal best, B - reciprocal best in a self-consistent triplet,
 m - similarity between sequences.
 
-----------------------------------------------------------------
-build_inupts/taxid_taxname  
+
+
+## build_inupts/taxid_taxname  
 
 is a tab delimited file containing the following columns:
 
-1) taxonomy id
-2) taxonomic name
+1. taxonomy id
+2. taxonomic name
 
-----------------------------------------------------------------
-build_inputs/all_proteins.data 
+
+
+## build_inputs/all_proteins.data 
 
 is a tab delimited file that lists all proteins and their gene information. 
 If a gene has multple protein accessions derived from alternative splicing event, 
@@ -77,8 +82,7 @@ tab-delimited columns are:
 
 
 
-----------------------------------------------------------------
-build_inputs/proteins_for_clustering.data
+## build_inputs/proteins_for_clustering.data
 
 is a tab delimited file that lists one protein per gene that were used for homologene clustering. 
 If a gene has multiple protein accessions derived from alternative splicing, 
@@ -98,8 +102,4 @@ Its format is the same as all_proteins.data and contains following columns:
 9) starting position of gene in 0-based coordinate
 10) end position of the gene in 0-based coordinate 
 11) strand
-
---------------------------------------------------------------------
-
-
 
