@@ -15,7 +15,7 @@ if exist *.csv (
 
   for %%a in (*.csv) do (
     set /a csvcount=!scvcount!+1
-    rscript corr_pval.cmd.r "%%a" "result\%%a"
+    rscript corr_pval.r "%%a" "result\%%a"
 
     if errorlevel 1 (
       echo [LOG] Fiail to execution
