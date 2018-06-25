@@ -5,15 +5,16 @@
   note: Essential R command collection
 ---
 
-**Version info.**
+# Version info
+
 * v1.0 140310
-* v1.1 15
+* v1.1 15xxxx
 * v1.2 170907
-  * v1.2r1 171230
+* v1.2r1 171230 <- latest update
 
 [TOC]
 
-# Session 관리 함수
+# 0. Session 관리 함수
 
 ```r
 ls() # 기억된 변수의 목록을 표시
@@ -26,6 +27,7 @@ save.image("folder path") # R은 디렉토리 구분을 "\\" 또는 "/"으로 �
 
 list.files() # 작업공간내 파일 리스트 보여줌
 ```
+
 
 
 # I. 데이터 입출력 함수
@@ -85,6 +87,7 @@ read.dta("file path") # Stata 파일 읽기
 write(mat, file="aa.txt") # 작업공간에 aa.txt 이름과 테이블형태로 데이터를 출력
 write.table(mat, "aa.csv", sep=",", row.names=TRUE) # 작업공간에 aa.csv 파일을 생성
 ```
+
 
 
 # II. 일반 자료 함수
@@ -229,6 +232,7 @@ data[1] = NULL # data의 first column을 삭제
 ```
 
 
+
 # III. 논리 및 연산자, 함수, 인덱싱
 
 ## III-1. 사칙연산
@@ -295,6 +299,7 @@ subset(dfr$var<=30) # same as dfr[dfr$var<=30,]
 grep(pattern, x) # pattern을 벡터 x에서 검색, 인덱스를 반환함
 gsub("before", "after", x) # 벡터 x에서 "before"를 "after"로 치환함
 ```
+
 
 
 # IV. 그래프 함수
@@ -369,6 +374,7 @@ par(mfrow=c(1,2)) # 1행 2열로 plot 파티션 나누기
 ```
 
 
+
 # V. 통계 함수
 
 ```r
@@ -408,4 +414,4 @@ pbeta(x, a, b)# 베타분포
 ```
 
 ---
-By Kim SS @ 2014-2018
+Written by Kim SS @ 2014-2018
