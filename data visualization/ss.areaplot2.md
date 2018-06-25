@@ -42,3 +42,4 @@ gen.sgl
 
 ss.areaPlot2(gen.sgl,id,group.info$Group)
 '''
+```
