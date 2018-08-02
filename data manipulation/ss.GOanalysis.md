@@ -5,7 +5,7 @@ date:   "2017-06-12 MON"
 description: "This file is written for Yeast HD/LD/Rho project with DAVID results"
 ---
 
-```r{.lineNo}
+```r
 #install.packages("irr",repos="http://cran.us.r-project.org")
 ss.mdsMatrix = function(go) { # Matrix for Multidimensional scaling
   library(irr)
@@ -114,8 +114,8 @@ ss.gonet = function(mdsMat,goinfo,group=NULL,threshold=0.5,fname="ss.gonet",titl
     theme(plot.title=element_text(size=8,face="bold"))+
     theme_net()
 
-  ggsave(paste0("gonet_",fname,".png"),g1,width=width,height=height)
-  ggsave(paste0("gonet_",fname,"_n.png"),g2,width=width,height=height)
+  ggsave(paste0("gonet_",fname,"_",threshold,".png"),g1,width=width,height=height)
+  ggsave(paste0("gonet_",fname,"_",threshold,"_n.png"),g2,width=width,height=height)
   return(net.ann)
 }
 
@@ -147,7 +147,7 @@ ss.goGroup = function(net) {
   n=nrow(net); group=NULL; time1=Sys.time()
   pb=winProgressBar(title="ss.goGroup",label="ss.goGroup function progress", min=0,max=n,width=500)
   ann = unique(net[,c(-2,-3)]); net_ = unique(net[,1:2])
-  colnames(ann)=c("Goid","Geneset","Category","GeneN","TotalN")
+  colnames(ann)=c("Goid","Geneset","Category","GeneN","TermN")
   for(i in 1:n) {
     go = c(as.character(net_[i,1]),as.character(net_[i,2]))
     if(i==1) group[[1]] = go
@@ -288,4 +288,9 @@ names(mdsmat[[1]])="agreement"; names(mdsmat[[2]])="kappa"; names(mdsmat[[3]])="
 net = ss.gonet(mdsMat=mdsmat[[2]], goinfo=goinfo, group="Geneset", threshold=0.6,
                title=gs, fname=fname, width=9, height=8)
 cat(paste("4/4. Saved GO net result.\n  >> File name=",fname,".png\n"))
+
+## 5. Export GO table with kappa group
+goGroup = ss.goGroup(net)
+write.csv(goGroup,paste0(fname,"_GOgroups.csv"),row.names=F)
+cat(paste("6/6. Saved GO groups by kappa threshold.\n>> File name=",fname,"_GOgroups.csv\n"))
 ```
