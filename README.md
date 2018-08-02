@@ -7,10 +7,7 @@
 
 # Version info
 
-* v1.0 140310
-* v1.1 15xxxx
-* v1.2 170907
-* v1.2r1 171230 <- latest update
+`v1.0 140310` `v1.1 15xxxx` `v1.2 170907` `v1.2r1 171230` 
 
 [TOC]
 
