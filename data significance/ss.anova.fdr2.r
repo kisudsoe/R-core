@@ -1,4 +1,8 @@
 # 2016-05-06 ver
+## 'data' is a dataframe including gene signal intensity.
+## 'group' is a vector = c("A","A","A","B","B","B") as same length of column.
+
+# Change log
 ## ver 2.0	- 160503, Advanced process speed than 'ss.anova.fdr' function
 ## ver 2.1	- 160506, set rownames to result for Yeast HDLDRho project
 ## ver 2.1a - 160811, eliminate qvalue function (unavailable package)
@@ -69,27 +73,26 @@ ss.anova.fdr2 = function(data,group) {
 	result.r = result[order(raw.p),] # re-ordered by raw.p
 
 	matplot(result.r$raw.p, result.r, xlim=c(0,1),ylim=c(0,1),
-            main="Various multiple test correction methods",
-            xlab="Raw p-value",
-            ylab="Adjusted p-value",
-            type="l",
-            col=c("black",rainbow(9)), # Set color
-            lty=1,
-            lwd=2)
+          main="Various multiple test correction methods",
+          xlab="Raw p-value",
+          ylab="Adjusted p-value",
+          type="l",
+          col=c("black",rainbow(9)), # Set color
+          lty=1,
+          lwd=2)
 	legend('bottomright',
-           legend=c("raw.p",
-                    "fdrtool.tfdr",
-										"fdrtool.dlfdr",
-                    #"qvalue.fdr",
-                    "stat.BH.fdr",
-                    #"stat.Hommel",
-                    "stat.BY",
-                    "stat.Hochberg",
-                    "stat.Holm",
-                    "stat.Bonfferoni"),
+         legend=c("raw.p",
+                  "fdrtool.tfdr",
+                  "fdrtool.dlfdr",
+                  #"qvalue.fdr",
+                  "stat.BH.fdr",
+                  #"stat.Hommel",
+                  "stat.BY",
+                  "stat.Hochberg",
+                  "stat.Holm",
+                  "stat.Bonfferoni"),
 		   col=c("black",rainbow(9)), # Set color
-           cex=1,
-           pch=16)
+             cex=1, pch=16)
   dev.copy(png,filename="ss.anova.fdr2_matplot.png",width=7,height=7,units="in",res=100)
   dev.off()
 
@@ -115,7 +118,6 @@ ss.anova.fdr2 = function(data,group) {
 	cat('----------------------------------\n')
 
 	## plot draw done ##
-
 	#######################
 	# Duration time check #
 	#######################
