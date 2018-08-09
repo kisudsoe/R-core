@@ -2,6 +2,7 @@
 # v1.0  - 150821 FRI,First written
 # v1.0a - 160502 MON, update
 # v1.1  - 170606, Update for Atom
+# to find 'k' how about to use NbClust?
 
 ## Bibliography ##
 # http://manuals.bioinformatics.ucr.edu/home/R_BioCondManual#R_clustering
