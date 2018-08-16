@@ -6,11 +6,35 @@ output: html_document
 note: This document was made for Mice CR Liver Project.
 ---
 
-# 170412 WED
+# 180816 THU - ggplot
+
+Correlation R distribution histogram
+
+```R
+cr_str = c(0,0,0,15,15,15,30,30,30,45,45,45)
+cor_r = apply(probe[,2:13],1,function(x) {
+    cor(x,cr_str,method="pearson")
+})
+cor_r = data.frame(Corr=cor_r)
+print(dim(cor_r)); summary(cor_r)
+
+library(ggplot2)
+ggplot(cor_r, aes(Corr))+theme_bw()+
+    geom_histogram(breaks=seq(-1,1,by=0.05),
+                   col="black",fill="gray",
+                   show.legend=F)
+ggsave(paste(date,"corr_hist.png"),width=10,height=7,units="cm")
+```
+
+
+
+
+
+# 170412 WED - ggplot
 
 ## Input AffyEC_report
 
-```{r id:"j1eme0ld"}
+```R
 chp_EC = read.delim("AffyEC_Report_Probe signal.tsv")
 group = c("CD","CR85","CR55","CR70",
           "CD","CR55","CR70","CR85",
@@ -21,7 +45,7 @@ colnames(chp_EC) = c("AffyID",as.vector(group))
 
 ## Histogram
 
-```{r id:"j1enl4g2"}
+```R
 library(reshape)
 tmp1 = subset(chp_EC,AffyID%in%Affyid_anti)
 tmp2 = subset(chp_EC,AffyID%in%Affyid_intron)
