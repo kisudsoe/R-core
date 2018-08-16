@@ -1,6 +1,8 @@
-﻿# 2016-05-04 WED----
-## Ver 2.0 - 160504, Advanced process speed
+﻿# Ver 2.0 Advanced speed
+- `160504` Advanced process speed
+- `180816` Minor change
 
+```R
 ss.tukey2 = function(data,groups) {
 	library(multcompView) # package multcompView install needed
 	library(pbapply) # package for progressbar, install needed
@@ -9,22 +11,22 @@ ss.tukey2 = function(data,groups) {
 
 	cat('\nProcess iteration =',n,'\n')
 	time1 = Sys.time()
-
+	
 	# Tukey's post hoc test
 	out = pbapply(data,1,function(row){
 		values = as.numeric(row)
-		a1 = aov(values~groups)
-		posthoc = TukeyHSD(x=a1, conf.level=0.95) # 95% confidence interval
+		a = aov(values~groups)
+		posthoc = TukeyHSD(x=a, conf.level=0.95) # 95% confidence interval
 		#plot(posthoc) # generate graph
 		#text(0,10.7,cex=1.2,labels=row[i],xpd=TRUE) # Set ID on the graph
-
+	
 		ex.pval = extract_p(posthoc$groups)
 		sigroup = multcompLetters(ex.pval) # using multcompView package
 		output = t(data.frame(sigroup$Letters))
 		return(output)
 		}) # apply statement end
 	out = as.data.frame(t(out))
-
+	
 	## Get column names ##
 	values = as.numeric(data[1,])
 	ex.pval = extract_p(TukeyHSD(x=aov(values~groups),conf.level=0.95)$groups)
@@ -35,12 +37,17 @@ ss.tukey2 = function(data,groups) {
 	return(out)
 }
 
-tukey_gene = ss.tukey2(data_gene_mainNum,group)
+groups = c("CD","CD","CD","CR85","CR85","CR85","CR70","CR70","CR70","CR55","CR55","CR55")
+groups = factor(groups,levels=c("CD","CR85","CR70","CR55"))
+tukey = ss.tukey2(data_gene_mainNum,groups)
+```
 
 
-# 2016-05-01 SUN----
-## Ver 1.0 - 160501, Tukey for post hoc test
+# Ver 1.0 `2016-05-01 SUN`
+- `160501` Tukey for post hoc test, First coded.
 
+
+```R
 ss.tukey = function(data,groups) { # function 'ss.tukey' start
 	library(multcompView) # package multcompView install needed
 	result = 0
@@ -51,20 +58,20 @@ ss.tukey = function(data,groups) { # function 'ss.tukey' start
 
 	for(i in 1:n) { # 'for' statement start
 		values = as.numeric(t(data)[,i])
-
+	
 		# post hoc tests - tukey #
 		a1 = aov(values~groups)
 		posthoc = TukeyHSD(x=a1, conf.level=0.95) # 95% confidence interval
 		#plot(posthoc) # generate graph
 		#text(0,10.7,cex=1.2,labels=row[i],xpd=TRUE) # ID on the graph
-
+	
 		# using multcompView package #
 		ex.pval = extract_p(posthoc$groups)
 		sigroup = multcompLetters(ex.pval)
-
+	
 		# stack iterative results
 		out = rbind(out,t(data.frame(sigroup$Letters)))
-
+	
 		#######################
 		# Create progress bar #
 		#######################
@@ -87,3 +94,4 @@ ss.tukey = function(data,groups) { # function 'ss.tukey' start
 } # function 'ss.tukey' end
 
 sgnl.cerev_tukey = ss.tukey(sgnl.cerev,group)
+```
