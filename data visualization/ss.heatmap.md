@@ -2,7 +2,268 @@
 
 
 
-## 170609 Yeast HD/LD/Rho project
+## 180129 Yeast HD-LD project 2
+
+update several options, modify to display only a subcategory and so on..
+
+```R
+source("https://bioconductor.org/biocLite.R")
+biocLite("ComplexHeatmap") # 왜 안되지?
+
+ss.heatmap4 = function(mat,title="", type=NULL, annot=NULL, location=F, hr.order=NULL,
+                       split=NULL, split_order=NULL, ra_width=10, width=7, height=8, img_name=NULL) {
+  library(ComplexHeatmap)
+  tukey_order = c("cab","baa","cba","abc","abb","acb", "aba","bab", "bca","bba","aab","bac")
+  #if(type=="metab") tukey_order = c("b.b.a","b.a.a","c.b.a","c.a.b","b.a.c", "a.b.a","a.c.b","a.b.c","a.a.b")
+  # Sort matrix by tukey and HD/LD FC
+  if(type=="metab" && nrow(mat)>1) {
+    mat.s1 = t(scale(t(mat[,1:24])))
+    mat.s1.HD = apply(mat.s1[,1:8],1,mean)
+    mat = mat[order(factor(mat$Tukey,levels=tukey_order),-mat.s1.HD),]
+    mat_name = apply(data.frame(mat$Tukey2,mat$Name2),1,function(row) {
+      #if(as.numeric(row[1])<2 & as.numeric(row[1])>-2) paste0(row[2],"*")
+      if(row[1]%in%c("b.b.a","a.a.b")) paste0(row[2],"*")
+      else row[2]
+    })
+  } else if(nrow(mat)>1) {
+    mat.s1 = t(scale(t(mat[,2:16])))
+    mat.s1.HD = apply(mat.s1[,1:5],1,mean); #mat.s1.LD = apply(mat.s1[,6:10],1,mean)
+    mat = mat[order(factor(mat$Tukey,levels=tukey_order),-mat.s1.HD),] #-mat$`HD/LD`, -mat.s1.LD
+  }
+
+  # Concatenate Row names
+  if(type=="none") {
+    mat_ = mat[,2:16]; tukey_ = data.frame(Tukey=mat$Tukey2)
+    annot_ = paste0(mat$AFFYid," (",mat$Symbol1,") ",mat$Tukey2)
+    row.names(mat_) = annot_
+    row.names(tukey_) = annot_
+  } else if(type%in%c("some","summ")) {
+    mat_ = mat[,2:16]; tukey_ = data.frame(Tukey=mat$Tukey2)
+    if(location) location_ = mat[,24:ncol(mat)]
+    ann1 = paste0(mat$Tukey2,"-",mat$AFFYid," (",mat$Symbol1,") ")
+    if(annot=="Category") annot_ = paste0(ann1,mat$Category)
+    else if(annot=="Cat0") annot_ = paste0(ann1,mat$Cat0)
+    else if(annot=="Cat1") annot_ = paste0(ann1,mat$Cat1)
+    else if(annot=="Cat2") annot_ = paste0(ann1,mat$Cat2)
+    else if(annot=="Cat3") annot_ = paste0(ann1,mat$Cat3)
+    else if(annot=="Cat") annot_ = paste0(ann1,mat$Cat)
+    else if(annot=="Name") annot_ = ann1
+    else annot_ = paste0(mat$AffyID," ",mat$SGDid)
+    row.names(mat_) = annot_
+    row.names(tukey_) = annot_#mat$SGDid
+    if(location) row.names(location_) = annot_
+  } else if(type=="metab") {
+    mat_ = mat[,1:24]; tukey_ = data.frame(Tukey=mat$Tukey)
+    ann2 = paste0(mat$Tukey,"-",mat$KEGG," (",mat$Name.y,")")
+    if(annot=="Category") annot_ = paste0(mat$Category)
+    else if(annot=="Cat0") annot_ = paste0(mat$Cat0)
+    else if(annot=="Cat1") annot_ = paste0(mat$Cat1)
+    else if(annot=="Cat2") annot_ = paste0(mat$Cat2)
+    else if(annot=="Cat3") annot_ = paste0(mat$Cat3)
+    else if(annot=="Name") annot_ = paste0(mat_name)
+    else annot_ = paste0(mat$Category,", ",mat$Name)
+    annot_ = paste0(ann2," ",annot_)
+    row.names(mat_) = annot_
+    row.names(tukey_) = annot_
+  } else {
+    mat_ = mat
+  }
+  
+  # heatmap split by annotation
+  if(split=="Tukey") {split = factor(mat$Tukey2); print(">> Split by tukey <<")}
+  else if(split=="Location") {split = factor(mat$location); print(">> Split by Location <<")}
+  else if(split=="Cat0") {split = factor(mat$Cat0); print(">> Split by Cat0 <<")}
+  else if(split=="Cat1") {split = factor(mat$Cat1); print(">> Split by Cat1 <<")}
+  else if(split=="Cat2") {split = factor(mat$Cat2); print(">> Split by Cat2 <<")}
+  if(!is.null(split_order)) {split = factor(split,levels=split_order)}
+  mat.s = t(scale(t(mat_)))
+
+  #install.packages('circlize',repos="http://cran.us.r-project.org")
+  library(circlize)
+  #mat.s_max = max(mat.s); mat.s_min = min(mat.s)
+  #col.rg = c(mat.s_min,0,mat.s_max)
+  col.rg = c(-2.2,0,2.2)
+  if(type=="metab") cell.cols = colorRamp2(col.rg,c("Green","Black","Red"))
+  else cell.cols = colorRamp2(col.rg,c("Cyan","black","Yellow"))
+
+  if(type!="metab") {
+    hc = hclust(as.dist(1-cor(mat_,method="pearson")),method="complete")
+    hc.dd = as.dendrogram(hc)
+    if(!is.null(hr.order)) hc.dd = reorder(hc.dd,hr.order,mean)
+  }
+  
+  if(type%in%c("none","summ")) {
+    hm = Heatmap(matrix              = mat.s,
+                 column_title        = title,
+                 name                = "Z-score",
+                 col                 = cell.cols,
+                 cluster_columns     = F, #hc.dd,
+                 cluster_rows        = F,
+                 column_dend_reorder = F,
+                 column_dend_height  = unit(2,"cm"),
+                 column_names_side   = "top",
+                 show_row_names      = F,
+                 split               = split,
+                 row_title_gp        = gpar(cex=1),
+                 row_names_gp        = gpar(cex=1),
+                 row_names_max_width = unit(ra_width,"cm"),
+                 show_heatmap_legend = T)
+  } else if(type=="some") {
+    hm = Heatmap(matrix              = mat.s,
+                 column_title        = title,
+                 name                = "z-score",
+                 col                 = cell.cols,
+                 cluster_columns     = F, #hc.dd,
+                 cluster_rows        = F,
+                 column_dend_reorder = F,
+                 column_dend_height  = unit(1,"cm"),
+                 column_names_side   = "top",
+                 row_dend_width      = unit(1,"cm"),
+                 show_row_names      = F,
+                 split               = split,
+                 row_title_gp        = gpar(cex=1),
+                 row_names_gp        = gpar(cex=1),
+                 row_names_max_width = unit(ra_width,"cm"),
+                 show_heatmap_legend = T)
+    #hm = hm1+ra
+    #print(draw(hm, heatmap_legend_side = "left"))
+  } else if(type=="metab") {
+    hm = Heatmap(matrix              = mat.s,
+                 column_title        = title,
+                 name                = "z-score",
+                 col                 = cell.cols,
+                 cluster_columns     = F, #hc.dd,
+                 cluster_rows        = F,
+                 column_dend_reorder = F,
+                 column_dend_height  = unit(1,"cm"),
+                 column_names_side   = "top",
+                 show_row_names      = F,
+                 split               = split,
+                 row_title_gp        = gpar(cex=1),
+                 row_names_gp        = gpar(cex=1),
+                 row_names_max_width = unit(ra_width,"cm"),
+                 show_heatmap_legend = T)
+  } else {
+    hm = Heatmap(matrix              = mat.s,
+                 column_title        = title,
+                 name                = "Probeset\nintensity\n(Scaled)",
+                 col                 = cell.cols,
+                 cluster_columns     = hc.dd,
+                 column_dend_reorder = F,
+                 column_dend_height  = unit(2,"cm"),
+                 column_names_side   = "top",
+                 row_dend_width      = unit(2,"cm"),
+                 show_row_names      = F,
+                 split               = split,
+                 row_title_gp        = gpar(cex=0.8))
+    #print(hm)
+  }
+  
+  # 2nd heatmap for tukey pattren
+  # Tukey pattern heatmap
+  col2 = c("bba"="goldenrod1","aab"="dodgerblue", # Rho-specific genes
+           "bca"="goldenrod1","bac"="dodgerblue",  # Buffered Rho genes
+           "aba"="goldenrod1","bab"="dodgerblue", # LD-specific genes
+           "cab"="lightpink", "acb"="lightblue1",  # Buffered HD genes
+           "baa"="red",       "abb"="blue",  # HD-specific genes
+           "cba"="red",       "abc"="blue")
+  if(type%in%c("none","summ")) show_row_names = F
+  else if(location) show_row_names = F
+  else show_row_names = T
+  h2=Heatmap(tukey_, name="Tukey",
+             cluster_columns=F,
+             cluster_rows=F,
+             show_row_names=show_row_names,
+             column_names_side="top",
+             row_names_max_width = unit(ra_width,"cm"),
+             col=col2)
+  # 3rd heatmap for location table
+  if(location) {
+    col3 = c("YES"="forestgreen","NO"="grey80")
+    if(type%in%c("none","summ")) show_row_names = F
+    else show_row_names = T
+    h3=Heatmap(location_, name="Location",
+               cluster_columns=F,
+               cluster_rows=F,
+               column_names_side="top",
+               show_row_names=show_row_names,
+               row_names_max_width = unit(ra_width,"cm"),
+               col=col3)
+  }
+  
+  # Draw heatmap
+  if(type=="summ") {
+    subset = sample(11811,500)
+    labels = mat$Cat0[subset]
+    ra = rowAnnotation(link=row_anno_link(at=subset,labels=labels), width=unit(1,"cm")+max_text_width(labels))
+    if(location) print(hm+h2+h3+ra)
+    else print(hm+h2+ra)
+  } else {
+    
+    if(location) print(hm+h2+h3)
+    else print(hm+h2)
+  }
+  
+  if(!is.null(img_name)) {
+    dev.copy(png,img_name,width=width,height=height,units="cm",res=100)
+    dev.off()
+    cat("Draw heatmap done.\n")
+  }
+}
+
+# Function for Location table by Affyid
+ss.affyLocation = function(annot_) {
+    # strsplit for location of genes
+    locations = annot_$Location
+    locations_ = NULL
+    for(i in 1:length(locations)) {
+        if(length(grep(", ",locations[i]))>0) {
+            loc_split = strsplit(as.character(locations[i]),split=", ")
+            rows = data.frame(id=rep(annot_$AFFYid[i],length(loc_split)),loc=loc_split)
+            colnames(rows) = c("id","location")
+            locations_ = rbind(locations_,rows)
+        } else {
+            row = data.frame(id=annot_$AFFYid[i],location=locations[i])
+            locations_ = rbind(locations_,row)
+        }
+    }
+    locations_ = unique(locations_)
+    loc.df = data.frame(table(factor(as.character(locations_$loc))))
+    #loc.df = loc.df[order(loc.df$Freq,decreasing=T),] # Custom location order
+    print(loc.df)
+    
+    # affyid list of locations
+    affyid_list=NULL; loc_names=NULL;
+    loc = loc.df$Var1
+    for(i in 1:length(loc)) {
+        loc_sub = subset(locations_,location %in% loc[i])
+        loc_ids = as.character(unique(loc_sub$id))
+        if(i==1&length(loc_ids)==1) affyid_list = list(loc_ids) # bugfix_171114
+        else affyid_list[[i]] = loc_ids
+        loc_names = c(loc_names,paste0(loc[i]," (",length(loc_ids),")"))
+    }
+    names(affyid_list) = loc_names
+    
+    # Union table generation
+    affyid_uni = Reduce(union,affyid_list)
+    affyid_tbl = NULL
+    for(i in 1:length(loc_names)) {
+        ids = affyid_list[[i]]
+        affyid_tbl = cbind(affyid_tbl, ids[match(affyid_uni,ids)])
+    }
+    affyid_df = (affyid_tbl!="") # If value exist, then TRUE
+    affyid_df[!is.na(affyid_tbl)] = "YES"
+    affyid_df[is.na(affyid_df)] = "NO" # If value is null, then FALSE
+    rownames(affyid_df) = affyid_uni; colnames(affyid_df) = loc_names
+    return(affyid_df)
+}
+```
+
+
+
+
+
+## 170609 Yeast HD-LD project
 
 ```r
 ss.heatmap4 = function(mat,title="", hr.order=NULL, split=NULL, img_name=NULL) {
