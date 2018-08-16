@@ -5,12 +5,14 @@ Version: v3.1
 Note : First written of this file was at 2013
 ---
 
-* v3.0  - 2017-07-15 SAT, Update install pakcages
-* v3.1  - 2017-10-14 SAT, Update keyboard input
+* `170715` v3.0  - Update install packages
+* `171014` v3.1  - Update keyboard input
 
-## 1. Data input
 
-### R update to v3.3.1
+
+# R update
+
+## R update to latest version
 
 * R update in R command
 
@@ -36,7 +38,12 @@ install.packages('multicompView', repos="http://cran.us.r-project.org")
 source("https://bioconductor.org/biocLite.R"); biocLite("limma")
 ```
 
+
+
+# Data read/write
+
 ### Read from keyboard input
+
 ```r
 a=readLines(con=file("stdin"))
 ```
@@ -54,7 +61,12 @@ lapply(pca.AST,function(x)
        write.table(data.frame(x),"pca.AST.csv",append=T,sep=",")) # save list as csv file
 ```
 
+
+
+# ProgressBar
+
 ### winProgressBar
+
 * Updated at 2017
 
 ```r {.lineNo}
