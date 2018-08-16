@@ -46,12 +46,9 @@ ss.areaPlot2(gen.sgl,id,group.info$Group)
 '''
 <<<<<<< HEAD
 ```
-=======
+
 
 ```
-
-
-
 ## 160324 Mouse muscle aging project
 
 - Line area plot for fibrosis network (2)
@@ -59,7 +56,7 @@ ss.areaPlot2(gen.sgl,id,group.info$Group)
 - Minor edit 01 (2016-03-31 THU) -
 - Minor edit 02 (2016-04-01 FRI) - Add 'data_total'
 
-```R
+​```R
 data = input(1) # Input signal data
 data_total = input(1) # input total data
 group = input(0) # input group info : 14	14	14	29	29	29	44	44	44...
