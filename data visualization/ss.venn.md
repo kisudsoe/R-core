@@ -2,18 +2,18 @@
 - ver1.0 - 170704, Generate for Dog project
 ```r
 ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
- 	 # grouplist = list(group1,group2,group3)
- 	 library(limma)
+	# grouplist = list(group1,group2,group3)
+	library(limma)
 	# Generate union group from input three groups
- 	 unionlist = Reduce(union, grouplist)
+	unionlist = Reduce(union, grouplist)
 
 	# Get names from input vectors
 	g.title = names(grouplist)
 	
 	# Togethering the vectors to one dataFrame list
- 	 unionPr=NULL; title=NULL
- 	 for(i in 1:length(grouplist)) {
-  	 	unionPr = cbind(unionPr,grouplist[[i]][match(unionlist,grouplist[[i]])])
+	unionPr=NULL; title=NULL
+ 	for(i in 1:length(grouplist)) {
+  		unionPr = cbind(unionPr,grouplist[[i]][match(unionlist,grouplist[[i]])])
    		title = c(title,paste(g.title[i],'\n',length(grouplist[[i]])))
   	}
   	rownames(unionPr) = unionlist
@@ -26,7 +26,7 @@ ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
 	out = list(list=union, vennCounts=vennCounts(union))
 
   	## Generate Venn Diagram
-	v = vennDiagram(union,main=paste0(main," (",nrow(union)," genes)"),circle.col=rainbow(length(g.title)))
+	v = vennDiagram(union,main=paste0(main," (",nrow(union)," genes)"), circle.col=rainbow(length(g.title)))
   	print(v)
   	dev.copy(png,"ss.venn.png",width=8,height=8,units="in",res=100)
   	graphics.off()
