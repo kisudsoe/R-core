@@ -14,7 +14,7 @@ v1.3  - 170703, Dog project
 * Get R packages for useMart
 * https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html
 
-```r {.lineNo}
+```R
 source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
 biocLite("hom.Sc.inp.db")
@@ -26,7 +26,7 @@ biocLite("org.Sc.sgd.db")
 
 * Custom functions
 
-```r {.lineNo}
+```R
 ## Ensembl search of 'Ortho_inpara' to get EntrezGene ID
 ens.getBM = function(query_ids,attri=NULL,filter,marts,labels){
   if(length(attri)==0) attributes = c('ensembl_peptide_id','ensembl_gene_id',
@@ -43,7 +43,6 @@ ens.getBM = function(query_ids,attri=NULL,filter,marts,labels){
     cat(paste(i,'=',labels[i],'>>',length(rst[,1]),'\n'))
     i = i+1
   }
-
   return(out)
 }
 
@@ -146,10 +145,9 @@ ss.venn = function(grouplist, main="") {
 }
 ```
 
-1. Orthologs from Ensembl Compara
----------------------------------
+# 1. Orthologs from Ensembl Compara
 
-```r {.lineNo}
+```R
 library(biomaRt)
 human_ds = "hsapiens_gene_ensembl"; human_fl = "with_homolog_scer"
 mouse_ds = "mmusculus_gene_ensembl"; mouse_fl = "with_scerevisiae_homolog"
@@ -201,12 +199,12 @@ print(length(ortho_ensem_egid_yeast))
 ```
 
 # 2. Orthologs from Inparanoid yeast
-------------------------------------
 
-* https://bioconductor.org/packages/release/data/annotation/html/hom.Hs.inp.db.html
+- https://bioconductor.org/packages/release/data/annotation/html/hom.Hs.inp.db.html
+
 * https://bioconductor.org/packages/release/data/annotation/html/hom.Sc.inp.db.html
 
-```r {.lineNo}
+```R
 library(DBI) # To utilize sql query
 
 library(hom.Hs.inp.db) # Human
@@ -280,10 +278,9 @@ head(ortho_inpara_ann)
 data.frame(table(ortho_inpara_ann$annNum))
 ```
 
-3. Get orthologs from HomoloGene
---------------------------------
+# 3. Get orthologs from HomoloGene
 
-```r {.lineNo}
+```R
 #library(annotationTools)
 #browseVignettes("annotationTools")
 
@@ -334,12 +331,11 @@ ortho_homo_ann[sample(nrow(ortho_homo_ann),10),]
 data.frame(table(ortho_homo_ann$annNum))
 ```
 
-4. Venn analysis of orthologs
------------------------------
+# 4. Venn analysis of orthologs
 
 * using 'ss.venn3' function - 170704 renewal ver
 
-```r {.lineNo}
+```R
 ortho_egid_canis = list(ortho_ensem_egid_canis,ortho_inpara_egid_canis,ortho_homo_egid_canis)
 names(ortho_egid_canis) = c("Ensembl_dog","Inparanoid_dog","HomoloGene_dog")
 
@@ -355,10 +351,9 @@ ortho_union_egid_yeast = ss.venn3(ortho_egid_yeast, main="Dog-Yeast orthologs (Y
 print(dim(ortho_union_egid_yeast$list))
 ```
 
-5. Search target orthologs
---------------------------
+# 5. Search target orthologs
 
-```r {.lineNo}
+```R
 ortho.genes = function(targets=NULL, dblist=c("ensembl","inparanoid","homologene"), Tbform=1){ # Tbform=1(cluster table)/2(1:1 match table)
   time1 = Sys.time()
   ensem = data.frame(); inpara = data.frame()
@@ -503,7 +498,7 @@ ortho.genes = function(targets=NULL, dblist=c("ensembl","inparanoid","homologene
   return(out)
 }
 ```
-```r
+```R
 #ortho.genes(target=c("PXA1","PXA2"),Tbform=2)
 #ortho.genes(target="ABCD1")
 #ortho.genes(target=c(6520,215,5594))
