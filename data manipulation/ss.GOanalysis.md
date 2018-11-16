@@ -248,7 +248,7 @@ write.csv(goGroup,paste0(fname,"_GOgroups.csv"),row.names=F)
 cat(paste("6/6. Saved GO groups by kappa threshold.\n>> File name=",fname,"_GOgroups.csv\n"))
 ```
 
-## 3. GeneSet Enrichment Analysis (GSEA) - Multi-genesets
+## 3. GSEA for Multi-genesets
 
 1. Cohen's kappa score (irr package) `<-` comparing agreement proportion later
 2. Draw GO netowrk (geomnet package)
