@@ -70,16 +70,22 @@ lapply(pca.AST,function(x)
 * Updated at 2017
 
 ```r {.lineNo}
-time1=Sys.time(); n=length(iter)
+pdtime = function(time) {
+    t=Sys.time()
+    d=difftime(t,time,unit="sec")
+    if(d<60) d=paste(round(d,1),"sec")
+    else if(d>=60 && d<3600) d=paste(round(d/60,1),"min")
+    else if(d>=3600) d=paste(round(d/3600,1),"hr")
+    out = paste("Job done:",t,"for",d)
+    return(out)
+}
+
+t=Sys.time(); n=length(iter)
 pb=winProgressBar(title="Progress",label="description",min=0,max=n,width=500)
-for(i in 1:300) {
+for(i in 1:n) {
 	## Progress time ##
-	d=difftime(Sys.time(),time1,unit="sec")
-	if(d<60) d=paste(round(d,2),"sec")
-	else if(d>=60 && d<3600) d=paste(round(d/60,1),"min")
-	else if(d>=3600) d=paste(round(d/3600,1),"hr")
 	setWinProgressBar(pb,i,title=paste0(round(i/n*100,1)," % (",i,"/",n,") done for ",d))
 	###################
 }
-print(difftime(Sys.time(),time1,units="auto")); close(pb)
+close(pb); print(pdtime(t))
 ```
