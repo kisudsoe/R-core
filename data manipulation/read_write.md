@@ -84,7 +84,7 @@ t=Sys.time(); n=length(iter)
 pb=winProgressBar(title="Progress",label="description",min=0,max=n,width=500)
 for(i in 1:n) {
 	## Progress time ##
-	setWinProgressBar(pb,i,title=paste0(round(i/n*100,1)," % (",i,"/",n,") done for ",d))
+	setWinProgressBar(pb,i,title=paste0(round(i/n*100,1)," % (",i,"/",n,") done for ",pdtime(t)))
 	###################
 }
 close(pb); print(pdtime(t))
