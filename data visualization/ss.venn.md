@@ -6,7 +6,6 @@ ss.venn = function(grouplist, main="") { # 170704 ver - id for multi-groups
 	library(limma)
 	# Generate union group from input three groups
 	unionlist = Reduce(union, grouplist)
-
 	# Get names from input vectors
 	g.title = names(grouplist)
 	
