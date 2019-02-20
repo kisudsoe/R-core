@@ -5,8 +5,11 @@ date:   "2017-07-03 MON"
 note:   "This code was written for ortholog collections from Ensembl Compara, Inparanoid and NCBI HomoloGene"
 ---
 
+# Ortholog Collection
+
 Code logs
 ---------
+
 v1.1  - 161125, Yeast network project
 v1.2  - 170417, Mice CR liver project
 v1.3  - 170703, Dog project
