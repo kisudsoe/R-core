@@ -29,7 +29,9 @@ updateR(F,T,T,F,T,F,T) # install,move,update.package,quit R
 set path=%path%;C:\Progarm Files\R\R-3.4.1\bin
 ```
 
-## 2. R-Jupyter link
+
+
+## 2. Install Jupyter
 
 - In CMD (authorized), execute following code for python version check
 
@@ -58,6 +60,8 @@ jupyter lab --version
 - Project Jupyter homepage: <http://jupyter.org/install.html>
 
 
+
+## 3. Install R kernel for Jupyter
 
 - In R, install IRkernel. Be sure all JupyterLab was closed.
 
