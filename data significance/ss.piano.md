@@ -1,5 +1,5 @@
 ---
-title: "Gene st analysis using Piano library"
+title: "Gene set analysis using Piano library"
 author: "KimSS"
 date: "2017-12-21 THU"
 note: Original file at `2016.04 Yeast HD.LD.Rho0\Gene set analysis.ipynb`
